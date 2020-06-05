@@ -973,6 +973,17 @@ int set_param_relative_transmission(parameters *params, double value, int idx)
 }
 
 /*****************************************************************************************
+*  Name:        set_param_manual_traceable_fraction
+*  Description: Sets the value of parameter in array
+******************************************************************************************/
+int set_param_manual_traceable_fraction(parameters *params, double value, int idx)
+{
+    if (idx >= N_INTERACTION_TYPES) return ERROR;
+    params->manual_traceable_fraction[idx] = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
 *  Name:		set_param_mean_time_to_symptoms
 *  Description: Sets the value of parameter
 ******************************************************************************************/
