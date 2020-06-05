@@ -861,8 +861,8 @@ void intervention_on_positive_result( model *model, individual *indiv )
 	)
 		intervention_notify_contacts( model, indiv, 1, index_token, DIGITAL_TRACE );
 
-	if( params->manual_trace_on_positive &&
-	 ( !index_already || !params->trace_on_symptoms || params->retrace_on_positive ) &&
+	if( ( params->manual_trace_on_positive ||
+		  ( params->manual_trace_on_hospitalization && is_in_hospital( indiv ) ) ) &&
 	  ( params->quarantine_on_traced || params->test_on_traced )
 	)
 		intervention_notify_contacts( model, indiv, 1, index_token, MANUAL_TRACE );
