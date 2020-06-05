@@ -338,6 +338,15 @@ void update_intervention_policy( model *model, int time )
 
 	if( time == params->testing_symptoms_time_off )
 		set_model_param_test_on_symptoms( model, FALSE );
+
+	if( time == params->testing_symptoms_time_off )
+		set_model_param_test_on_symptoms( model, FALSE );
+
+	if (params->manual_trace_on)
+	{
+		model->manual_trace_interview_quota = params->manual_trace_n_workers * params->manual_trace_interviews_per_worker_day;
+		model->manual_trace_notification_quota = params->manual_trace_n_workers * params->manual_trace_notifications_per_worker_day;
+	}
 };
 
 /*****************************************************************************************
@@ -509,11 +518,21 @@ void intervention_notify_contacts(
 	model *model,
 	individual *indiv,
 	int recursion_level,
-	trace_token *index_token
+	trace_token *index_token,
+	int trace_type
 )
 {
-	if( !indiv->app_user || !model->params->app_turned_on )
+	if( trace_type == DIGITAL_TRACE && (!indiv->app_user || !model->params->app_turned_on ))
 		return;
+
+	if( trace_type == MANUAL_TRACE)
+	{
+		if( model->params->manual_trace_exclude_app_users && indiv->app_user && model->params->app_turned_on)
+			return;
+		if( model->manual_trace_interview_quota <= 0 )
+			return;
+		model->manual_trace_interview_quota--;
+	}
 
 	interaction *inter;
 	individual *contact;
@@ -534,12 +553,19 @@ void intervention_notify_contacts(
 			for( idx = 0; idx < n_contacts; idx++ )
 			{
 				contact = inter->individual;
-				if( contact->app_user )
+				if( inter->traceable == UNKNOWN )
 				{
-					if( inter->traceable == UNKNOWN )
+					if( contact->app_user && trace_type == DIGITAL_TRACE )
 						inter->traceable = gsl_ran_bernoulli( rng, params->traceable_interaction_fraction );
-					if( inter->traceable )
-						intervention_on_traced( model, contact, model->time - ddx, recursion_level, index_token, risk_scores[ contact->age_group ] );
+					else if ( trace_type == MANUAL_TRACE && model->manual_trace_notification_quota > 0 )
+						inter->traceable = gsl_ran_bernoulli( rng, params->manual_traceable_fraction[inter->type] );
+				}
+				if( inter->traceable )
+				{
+					if (trace_type == MANUAL_TRACE)
+						model->manual_trace_notification_quota--;
+					intervention_on_traced( model, contact, model->time - ddx, recursion_level, index_token, risk_scores[ contact->age_group ], trace_type );
+
 				}
 				inter = inter->next;
 			}
@@ -635,7 +661,10 @@ void intervention_quarantine_household(
 			intervention_quarantine_until( model, contact, time_event, TRUE, index_token, contact_time, risk_scores[ contact->age_group ] );
 
 			if( contact_trace && ( model->params->quarantine_on_traced || model->params->test_on_traced ) )
-				intervention_notify_contacts( model, contact, NOT_RECURSIVE, index_token );
+			{
+				intervention_notify_contacts( model, contact, NOT_RECURSIVE, index_token, DIGITAL_TRACE );
+				intervention_notify_contacts( model, contact, NOT_RECURSIVE, index_token, MANUAL_TRACE );
+			}
 		}
 }
 
@@ -764,7 +793,7 @@ void intervention_on_symptoms( model *model, individual *indiv )
 			intervention_test_order( model, indiv, model->time + params->test_order_wait );
 
 		if( params->trace_on_symptoms && ( params->quarantine_on_traced || params->test_on_traced ) )
-			intervention_notify_contacts( model, indiv, 1, index_token );
+			intervention_notify_contacts( model, indiv, 1, index_token, DIGITAL_TRACE );
 
 		remove_traced_on_this_trace( model, indiv );
 		if( indiv->index_token_release_event != NULL )
@@ -830,7 +859,13 @@ void intervention_on_positive_result( model *model, individual *indiv )
 	 ( !index_already || !params->trace_on_symptoms || params->retrace_on_positive ) &&
 	  ( params->quarantine_on_traced || params->test_on_traced )
 	)
-		intervention_notify_contacts( model, indiv, 1, index_token );
+		intervention_notify_contacts( model, indiv, 1, index_token, DIGITAL_TRACE );
+
+	if( params->manual_trace_on_positive &&
+	 ( !index_already || !params->trace_on_symptoms || params->retrace_on_positive ) &&
+	  ( params->quarantine_on_traced || params->test_on_traced )
+	)
+		intervention_notify_contacts( model, indiv, 1, index_token, MANUAL_TRACE );
 
 	if( index_already )
 		intervention_index_case_symptoms_to_positive( model, index_token );
@@ -866,6 +901,7 @@ void intervention_on_critical( model *model, individual *indiv )
 *  				indiv 		 	- pointer to person being traced
 *  				contact_time 	- time at which the contact was made
 *				recursion level - layers of the network to reach this connection
+*				trace_type      - whether this trace was manual or digital
 *
 *  Returns:		void
 ******************************************************************************************/
@@ -875,7 +911,8 @@ void intervention_on_traced(
 	int contact_time,
 	int recursion_level,
 	trace_token *index_token,
-	double risk_score
+	double risk_score,
+	int trace_type
 )
 {
 	if( is_in_hospital( indiv ) || indiv->infection_events->is_case )
@@ -885,7 +922,8 @@ void intervention_on_traced(
 
 	if( params->quarantine_on_traced )
 	{
-		int time_event = model->time;
+		int trace_time = (trace_type == DIGITAL_TRACE) ? 0 : model->params->manual_trace_delay;
+		int time_event = model->time + trace_time;
 		int quarantine;
 
 		if( index_token->index_status == SYMPTOMS_ONLY )
@@ -917,7 +955,7 @@ void intervention_on_traced(
 	}
 
 	if( recursion_level != NOT_RECURSIVE && recursion_level < params->tracing_network_depth )
-		intervention_notify_contacts( model, indiv, recursion_level + 1, index_token );
+		intervention_notify_contacts( model, indiv, recursion_level + 1, index_token, DIGITAL_TRACE );
 }
 
 /*****************************************************************************************

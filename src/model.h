@@ -59,6 +59,9 @@ struct model{
 	directory *household_directory;
 	double mean_interactions[ N_AGE_TYPES ];
 
+	long manual_trace_interview_quota;
+	long manual_trace_notification_quota;
+
 	event *events;
 	event *next_event;
 	event_list *event_lists;
