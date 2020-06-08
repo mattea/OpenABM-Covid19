@@ -87,9 +87,10 @@ typedef struct{
 	int quarantine_days;					// number of days of previous contacts to quarantine
 	double self_quarantine_fraction;		// fraction of people who self-quarantine when show symptoms
 
+	int manual_trace_on;   // manual contract trace
+	int manual_trace_time_on;   				// time at which manual contact tracing begins
 	int manual_trace_on_hospitalization;   // manual contract trace on hospitalization
 	int manual_trace_on_positive;   // manual contract trace on positive result
-	int manual_trace_on;   // manual contract trace
 	int manual_trace_delay;   // delay in starting manual trace
 	int manual_trace_exclude_app_users;   // exclude app users from manual contact tracing
 	int manual_trace_n_workers;   // number of workers who can perform manual contact tracing

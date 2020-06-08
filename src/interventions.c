@@ -321,6 +321,9 @@ void update_intervention_policy( model *model, int time )
 	if( time == params->app_turn_on_time )
 		set_model_param_app_turned_on( model, TRUE );
 
+	if( time == params->manual_trace_time_on )
+		set_model_param_manual_trace_on( model, TRUE );
+
 	if( time == params->lockdown_time_on )
 		set_model_param_lockdown_on( model, TRUE );
 
@@ -527,6 +530,8 @@ void intervention_notify_contacts(
 
 	if( trace_type == MANUAL_TRACE)
 	{
+		if( !model->params->manual_trace_on )
+			return;
 		if( model->params->manual_trace_exclude_app_users && indiv->app_user && model->params->app_turned_on)
 			return;
 		if( model->manual_trace_interview_quota <= 0 )
@@ -553,19 +558,22 @@ void intervention_notify_contacts(
 			for( idx = 0; idx < n_contacts; idx++ )
 			{
 				contact = inter->individual;
-				if( inter->traceable == UNKNOWN )
+				if( contact->app_user || trace_type == MANUAL_TRACE )
 				{
-					if( contact->app_user && trace_type == DIGITAL_TRACE )
-						inter->traceable = gsl_ran_bernoulli( rng, params->traceable_interaction_fraction );
-					else if ( trace_type == MANUAL_TRACE && model->manual_trace_notification_quota > 0 )
-						inter->traceable = gsl_ran_bernoulli( rng, params->manual_traceable_fraction[inter->type] );
-				}
-				if( inter->traceable )
-				{
-					if (trace_type == MANUAL_TRACE)
-						model->manual_trace_notification_quota--;
-					intervention_on_traced( model, contact, model->time - ddx, recursion_level, index_token, risk_scores[ contact->age_group ], trace_type );
+					if( inter->traceable == UNKNOWN )
+					{
+						if( contact->app_user && trace_type == DIGITAL_TRACE )
+							inter->traceable = gsl_ran_bernoulli( rng, params->traceable_interaction_fraction );
+						else if ( trace_type == MANUAL_TRACE && model->manual_trace_notification_quota > 0 )
+							inter->traceable = gsl_ran_bernoulli( rng, params->manual_traceable_fraction[inter->type] );
+					}
+					if( inter->traceable )
+					{
+						if (trace_type == MANUAL_TRACE)
+							model->manual_trace_notification_quota--;
+						intervention_on_traced( model, contact, model->time - ddx, recursion_level, index_token, risk_scores[ contact->age_group ], trace_type );
 
+					}
 				}
 				inter = inter->next;
 			}
