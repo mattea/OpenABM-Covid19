@@ -69,6 +69,10 @@ struct model{
 	event *next_event;
 	event_list *event_lists;
 
+	long n_quarantine_perceived_false_positives;
+	long n_quarantine_false_positives;
+	long total_quarantined;
+
 	trace_token *trace_tokens;
 	trace_token *next_trace_token;
 	long n_trace_tokens_used;
