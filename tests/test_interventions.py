@@ -404,7 +404,7 @@ class TestClass(object):
             dict(
                 test_params = dict( 
                     n_total = 20000,
-                    n_seed_infection = 1000,
+                    n_seed_infection = 100,
                     end_time = 30,
                     infectious_rate = 12,
                     self_quarantine_fraction = 1.0,
@@ -429,8 +429,8 @@ class TestClass(object):
             ),
             dict(
                 test_params = dict( 
-                    n_total = 100000,
-                    n_seed_infection = 1000,
+                    n_total = 20000,
+                    n_seed_infection = 100,
                     end_time = 30,
                     infectious_rate = 12,
                     self_quarantine_fraction = 1.0,
@@ -457,8 +457,8 @@ class TestClass(object):
             ),
             dict(
                 test_params = dict( 
-                    n_total = 100000,
-                    n_seed_infection = 1000,
+                    n_total = 20000,
+                    n_seed_infection = 100,
                     end_time = 30,
                     infectious_rate = 12,
                     self_quarantine_fraction = 1.0,
