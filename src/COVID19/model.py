@@ -597,6 +597,9 @@ class Model:
         results["n_quarantine"] = covid19.utils_n_current(
             self.c_model, covid19.QUARANTINED
         )
+        results["n_quarantine_false_positives"] = self.c_model.n_quarantine_false_positives
+        results["n_quarantine_perceived_false_positives"] = self.c_model.n_quarantine_perceived_false_positives
+        results["total_quarantined"] = self.c_model.total_quarantined
         results["n_tests"] = covid19.utils_n_daily(
             self.c_model, covid19.TEST_RESULT, int(self.c_model.time) + 1
         )

@@ -423,9 +423,23 @@ void intervention_quarantine_release( model *model, individual *indiv )
 
 	if( indiv->quarantine_event != NULL )
 	{
+		if(( indiv->quarantine_test_result == NO_TEST &&
+                     ( time_symptomatic( indiv ) == UNKNOWN ||
+		       ( indiv->index_trace_token == NULL &&
+			 time_symptomatic( indiv ) < indiv->quarantine_event->time ))) ||
+		    ( indiv->index_trace_token == NULL &&
+		      indiv->quarantine_test_result == FALSE ))
+		{
+			model->n_quarantine_perceived_false_positives++;
+		}
+		if (indiv->index_trace_token == NULL && indiv->status == SUSCEPTIBLE )
+		{
+			model->n_quarantine_false_positives++;
+		}
 		remove_event_from_event_list( model, indiv->quarantine_event );
 		set_quarantine_status( indiv, model->params, model->time, FALSE );
-	};
+		model->total_quarantined++;
+	}
 }
 
 /*****************************************************************************************
