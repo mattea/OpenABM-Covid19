@@ -27,7 +27,6 @@ testing_symptoms_time_on,0
 trace_on_symptoms,0
 trace_on_positive,1
 retrace_on_positive,1
-traceable_interaction_fraction,0.92
 custom_occupation_network,1
 mobility_scale_all,0
 static_mobility_scalar,0
