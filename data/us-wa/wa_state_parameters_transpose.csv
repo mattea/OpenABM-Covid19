@@ -4,6 +4,8 @@ param_id,1
 n_total,7615000
 manual_trace_n_workers,1371
 manual_trace_on_positive,1
+manual_trace_interviews_per_worker_day,1
+manual_trace_notifications_per_worker_day,3
 app_users_fraction_0_9,0.23
 app_users_fraction_10_19,0.75
 app_users_fraction_20_29,0.96
