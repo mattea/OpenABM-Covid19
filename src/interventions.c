@@ -609,6 +609,7 @@ void intervention_manual_trace( model *model, individual *indiv )
 {
 	trace_token *index_token = index_trace_token( model, indiv );
 	indiv->traced_on_this_trace = TRUE;
+	index_token->index_status = POSITIVE_TEST;
 
 	intervention_notify_contacts( model, indiv, 1, index_token, MANUAL_TRACE );
 

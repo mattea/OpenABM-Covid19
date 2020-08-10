@@ -33,3 +33,4 @@ custom_occupation_network,1
 mobility_scale_all,0
 static_mobility_scalar,0
 app_users_fraction,0.6
+days_of_interactions,14
