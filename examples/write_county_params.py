@@ -71,8 +71,8 @@ changepoint_rate = [
 all_params = [{
     "county_fips": 53033, # King
     "n_seed_infection": 30,
-    "infectious_rate": 5.1,
-    "seeding_date_delta": 27,
+    "infectious_rate": 5.12,
+    "seeding_date_delta": 26,
     "lockdown_scalars": mobility_glm,
     "changepoint_scalars": changepoint_rate,
 },{
@@ -85,8 +85,8 @@ all_params = [{
 },{
     "county_fips": 53053, # Pierce
     "n_seed_infection": 30,
-    "infectious_rate": 5.2,
-    "seeding_date_delta": 15,
+    "infectious_rate": 5.36,
+    "seeding_date_delta": 13,
     "lockdown_scalars": mobility_glm,
     "changepoint_scalars": changepoint_rate,
 },
@@ -114,7 +114,8 @@ def household_sizes(households_file):
   houses_df["ones"] = 1
   house_counts = houses_df.pivot_table(index=houses_df.index,columns="sizes",aggfunc='count')['ones'].rename(columns=lambda l:f"household_size_{l}")
   house_counts.columns.name = None
-  house_counts.drop('household_size_0', axis=1, inplace=True)
+  if 'household_size_0' in house_counts.columns:
+    house_counts.drop('household_size_0', axis=1, inplace=True)
   return pops.join(house_counts)
 
 def main(args):
