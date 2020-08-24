@@ -3,17 +3,19 @@
 """
 
 import argparse
+import itertools
 import os
 
-import itertools
+import numpy as np
 import pandas as pd
 
 def relative_path(filename: str) -> str:
     return os.path.join(os.path.dirname(__file__), filename)
 
 parser = argparse.ArgumentParser(description="Generate county-specific parameters.")
-parser.add_argument("--households_file", type=str, default=relative_path("../data/us-wa/wa_county_household_demographics.csv"))
-parser.add_argument("--output_file", type=str, default=relative_path("../data/us-wa/wa_county_parameters.csv"))
+parser.add_argument("--households_file", type=str, default=relative_path("../data/us-wa/wa_county_household_demographics_unscaled.csv"))
+parser.add_argument("--output_params", type=str, default=relative_path("../data/us-wa/wa_county_parameters.csv"))
+parser.add_argument("--output_households", type=str, default=relative_path("../data/us-wa/wa_county_household_demographics.csv"))
 
 mobility_glm = [
     0.75361365, 0.6374258 , 0.6428742 , 0.64921296, 0.60837924, 0.59091055,
@@ -70,6 +72,7 @@ changepoint_rate = [
 
 all_params = [{
     "county_fips": 53033, # King
+    "n_total": 2252782,
     "n_seed_infection": 30,
     "infectious_rate": 5.12,
     "seeding_date_delta": 26,
@@ -77,6 +80,7 @@ all_params = [{
     "changepoint_scalars": changepoint_rate,
 },{
     "county_fips": 53061, # Snohomish
+    "n_total": 822083,
     "n_seed_infection": 30,
     "infectious_rate": 5.2,
     "seeding_date_delta": 21,
@@ -84,6 +88,7 @@ all_params = [{
     "changepoint_scalars": changepoint_rate,
 },{
     "county_fips": 53053, # Pierce
+    "n_total": 904980,
     "n_seed_infection": 30,
     "infectious_rate": 5.36,
     "seeding_date_delta": 13,
@@ -103,8 +108,7 @@ def process_scalars(scalars):
   #l_rescaled.append(pd.Series(scalars).rolling(7,1).mean().to_list()[-1])
   return stringify(l_rescaled)
 
-def household_sizes(households_file):
-  households = pd.read_csv(households_file, skipinitialspace=True, comment="#")
+def household_sizes(households):
   pops = households.groupby("county_fips").sum()
   pops = pops.rename(columns=lambda l: l.replace("a_","population_"))
   pops["n_total"] = pops.sum(axis=1)
@@ -118,11 +122,79 @@ def household_sizes(households_file):
     house_counts.drop('household_size_0', axis=1, inplace=True)
   return pops.join(house_counts)
 
+def ssd(a, b):
+  return sum((a-b)**2)
+def hpdx(sample):
+  return np.histogram(sample.sum(axis=1), bins=[1,2,3,4,5,6,1000])[0] / len(sample)
+def apdx(sample):
+  return sample.sum(axis=0)  / sample.sum()
+def calc_err(hh, house_dist, age_dist):
+  pop_pref = 2
+  age_p = apdx(hh)
+  house_p = hpdx(hh)
+  return  ssd(house_p, house_dist) + ssd(age_p, age_dist) * pop_pref
+
+def rejection_sample(panel, tot, house_dist=None, age_dist=None, batch_size=4, rs = np.random.RandomState(42)): 
+  initial_acceptance_factor = 1e-5
+  rejection_mult = 1.0001
+  acceptable_mult = 0.99
+  max_allowable_error = 1e-5
+
+  if house_dist is None:
+    house_dist = hpdx(panel)
+  if age_dist is None:
+    age_dist = apdx(panel)
+
+  sample = panel[rs.choice(panel.shape[0], size=batch_size),:]
+  #hh = np.concatenate((panel, sample), axis=0)
+  hh = sample
+  last_error = calc_err(hh, house_dist, age_dist)
+  error = last_error
+  acceptance = last_error * initial_acceptance_factor
+  while hh.sum() < tot:
+    sample = panel[rs.choice(panel.shape[0], size=batch_size),:]
+    nhh = np.concatenate((hh, sample), axis=0)
+    error = calc_err(nhh, house_dist, age_dist)
+    if (error < last_error + acceptance):
+      hh = nhh
+      acceptance *= acceptable_mult
+      last_error = min(error, last_error)
+    else:
+      acceptance *= rejection_mult
+  if error > max_allowable_error:
+    raise RuntimeError("Rejection sampling failed to converge.")
+  return hh, last_error, error
+
+def upsample(panel, tot, rs = np.random.RandomState(42)): 
+  rem = tot - panel.sum()
+  samples = [panel]
+  for idx in rs.permutation(panel.shape[0]):
+    if rem <= 0:
+      break
+    sample = panel[idx:idx+1,:]
+    rem -= sample.sum()
+    samples.append(sample)
+  return np.concatenate(samples)
+
+def hh_resample(households_file, all_params):
+  households = pd.read_csv(households_file, skipinitialspace=True, comment="#")
+  age_columns=[f"a_{a}" for a in AGE_BUCKETS]
+  new_households = []
+  for p in all_params:
+    #nhh = rejection_sample(households[households.county_fips == p["county_fips"]][age_columns].values, p["n_total"])
+    nhh = upsample(households[households.county_fips == p["county_fips"]][age_columns].values, p["n_total"])
+    nhh = pd.DataFrame(nhh, columns=age_columns)
+    nhh["county_fips"] = p["county_fips"]
+    new_households.append(nhh)
+  return pd.concat(new_households)
+
 def main(args):
   for p in all_params:
     p["lockdown_scalars"] = process_scalars(p["lockdown_scalars"])
     p["changepoint_scalars"] = process_scalars(p["changepoint_scalars"])
-  pd.DataFrame(all_params).set_index("county_fips").join(household_sizes(args.households_file), how="right").to_csv(args.output_file)
+  hhdf = hh_resample(args.households_file, all_params)
+  hhdf.to_csv(args.output_households)
+  pd.DataFrame(all_params).drop(columns="n_total").set_index("county_fips").join(household_sizes(hhdf), how="right").to_csv(args.output_params)
 
 if __name__ == '__main__':
   main(parser.parse_args())
