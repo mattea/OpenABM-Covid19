@@ -61,7 +61,8 @@ LOCAL_DEFAULT_PARAMS = {
     "app_turned_on": 0,
     "manual_trace_on": 0,
     "manual_trace_n_workers_per_100k": None,
-    "app_users_fraction": 0.8,
+    #"app_users_fraction": 0.8, # Deprecated, use app_population_fraction instead.
+    "app_population_fraction": 0.75,
     "custom_occupation_network": 1,
     "use_default_lockdown_multiplier": True,
     "use_default_work_interaction": False,
@@ -142,10 +143,11 @@ def bucket_to_age(b):
   return int(b.split("_")[1]) // 10
 
 def set_app_users_fraction(params, frac):
-    name = "app_users_fraction"
-    for b in AGE_BUCKETS:
-      bucket_name = f"{name}_{b}"
-      params.set_param(bucket_name, params.get_param(bucket_name) * frac)
+  total_app_users = sum((params.get_param(f"app_users_fraction_{ab}") * params.get_param(f"population_{ab}") for ab in AGE_BUCKETS))
+  scalar = min(1.0, frac * params.get_param("n_total") / total_app_users)
+  for b in AGE_BUCKETS:
+    bucket_name = f"app_users_fraction_{b}"
+    params.set_param(bucket_name, params.get_param(bucket_name) * scalar)
 
 def read_param_file(file_name):
   params = {}
@@ -210,8 +212,8 @@ def setup_params(network, params_overrides={}):
     else:
       params.set_param( p, v )
 
-  if "app_users_fraction" in params_dict:
-    set_app_users_fraction(params, params_dict["app_users_fraction"])
+  if "app_population_fraction" in params_dict:
+    set_app_users_fraction(params, params_dict["app_population_fraction"])
 
   if params_dict["manual_trace_n_workers_per_100k"] is not None:
     params.set_param(
@@ -255,7 +257,6 @@ def build_population(params_dict, houses):
     if idx >= n_total:
       break
   return pd.DataFrame({'ID':IDs, 'age_group':ages, 'house_no':house_no})
-
 
 
 def diff_params(local_params, global_params={}):
@@ -513,7 +514,7 @@ def run_baseline_forecast(network, params_dict):
   seeding_date_delta = int(params_dict["seeding_date_delta"])
   baseline_days = len(scalars) + seeding_date_delta
   params_dict["time_offset"] = baseline_days
-  end_time = max(int(params_dict["end_time"]), baseline_days)
+  end_time = max(int(params_dict["end_time"]) + seeding_date_delta, baseline_days)
   with tqdm(total=end_time) as pbar:
     for step in range(seeding_date_delta):
       model.one_time_step()
@@ -538,12 +539,18 @@ def run_baseline_forecast(network, params_dict):
       model.update_running_params("app_turned_on", 1)
     if params_dict["manual_trace_on"]:
       model.update_running_params("manual_trace_on", 1)
+
     for p, v in params_dict.items():
-      if not p.startswith("predicted_"):
-        continue
-      model.update_running_params(p.replace("predicted_",""), v)
-            
-    for step in range(end_time - baseline_days):
+      if p == "predicted_lockdown_occupation_multiplier_working_network":
+        scale_lockdown(
+            model,
+            v,
+            base_multipliers,
+            scale_all=False)
+      elif p.startswith("predicted_"):
+        model.update_running_params(p.replace("predicted_",""), v)
+
+    for step in  range(end_time - baseline_days):
       model.one_time_step()
       m_out.append(model.one_time_step_results())
       pbar.update()

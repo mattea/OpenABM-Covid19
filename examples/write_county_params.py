@@ -70,32 +70,61 @@ changepoint_rate = [
     0.7303984 , 0.7302203 , 0.73017645, 0.73017645, 0.7301605 ,
     0.7300091 , 0.7300091 ]
 
-all_params = [{
+all_params_sq8 = [{
     "county_fips": 53033, # King
     "n_total": 2252782,
     "n_seed_infection": 30,
-    "infectious_rate": 5.12,
-    "seeding_date_delta": 26,
+    "infectious_rate": 5.02,
+    "seeding_date_delta": 25,
     "lockdown_scalars": mobility_glm,
     "changepoint_scalars": changepoint_rate,
 },{
     "county_fips": 53061, # Snohomish
     "n_total": 822083,
     "n_seed_infection": 30,
-    "infectious_rate": 5.2,
-    "seeding_date_delta": 21,
+    "infectious_rate": 5.18,
+    "seeding_date_delta": 18,
     "lockdown_scalars": mobility_glm,
     "changepoint_scalars": changepoint_rate,
 },{
     "county_fips": 53053, # Pierce
     "n_total": 904980,
     "n_seed_infection": 30,
-    "infectious_rate": 5.36,
-    "seeding_date_delta": 13,
+    "infectious_rate": 5.22,
+    "seeding_date_delta": 14,
     "lockdown_scalars": mobility_glm,
     "changepoint_scalars": changepoint_rate,
 },
 ]
+
+all_params_sq2 = [{
+    "county_fips": 53033, # King
+    "n_total": 2252782,
+    "n_seed_infection": 30,
+    "infectious_rate": 4.00,
+    "seeding_date_delta": 27,
+    "lockdown_scalars": mobility_glm,
+    "changepoint_scalars": changepoint_rate,
+},{
+    "county_fips": 53061, # Snohomish
+    "n_total": 822083,
+    "n_seed_infection": 30,
+    "infectious_rate": 4.12,
+    "seeding_date_delta": 20,
+    "lockdown_scalars": mobility_glm,
+    "changepoint_scalars": changepoint_rate,
+},{
+    "county_fips": 53053, # Pierce
+    "n_total": 904980,
+    "n_seed_infection": 30,
+    "infectious_rate": 4.12,
+    "seeding_date_delta": 14,
+    "lockdown_scalars": mobility_glm,
+    "changepoint_scalars": changepoint_rate,
+},
+]
+
+all_params = all_params_sq8
 
 HOUSEHOLD_SIZES=[f"household_size_{i}" for i in  range(1,7)]
 AGE_BUCKETS=[f"{l}_{h}" for l, h in zip(range(0, 80, 10), range(9, 80, 10))] + ["80"]
