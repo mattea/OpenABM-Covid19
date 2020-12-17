@@ -1346,6 +1346,7 @@ int one_time_step( model *model )
 		   ( n_daily( model, MANUAL_CONTACT_TRACING, model->time ) > 0 )
 	)
 	{
+		transition_events( model, LATERAL_FLOW_TEST_TAKE,              &intervention_lateral_flow_test_take,          TRUE );
 		transition_events( model, TEST_TAKE,              &intervention_test_take,          TRUE );
 		transition_events( model, TEST_RESULT,            &intervention_test_result,        TRUE );
 		transition_events( model, MANUAL_CONTACT_TRACING, &intervention_manual_trace,       TRUE );

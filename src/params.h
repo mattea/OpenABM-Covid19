@@ -132,7 +132,7 @@ typedef struct{
 	int quarantine_household_contacts_on_symptoms; // quarantine the contacts of other household members when someone gets symptoms
 
 	int test_on_symptoms;					// carry out a test on those with symptoms
-	int test_on_traced;						// carry out a test on those with positive test results
+	int test_on_traced;						// carry out a test on those contacted via contact tracing
 	int test_result_wait;					// number of days to wait for a test result
 	int test_order_wait;					// minimum number of days to wait for a test to be taken
 	int test_result_wait_priority;			// number of days to wait for a priority test result
@@ -141,10 +141,17 @@ typedef struct{
 
 	int priority_test_contacts[N_AGE_GROUPS];      // number of contacts that triggers priority test
 
-	int test_insensitive_period;			// number of days until a test is sensitive (delay test of recent contacts)
-	int test_sensitive_period;				// number of days post infection in which the test is sensitive
-	double test_sensitivity;				// sensitivity of test
-	double test_specificity;				// specificity of test
+	int test_insensitive_period;			// number of days until a PCR test is sensitive (delay test of recent contacts)
+	int test_sensitive_period;				// number of days post infection in which the PCR test is sensitive
+	double test_sensitivity;				// sensitivity of PCR test
+	double test_specificity;				// specificity of PCR test
+
+	int lateral_flow_test_on_symptoms;		  // carry out a lateral flow test on those with symptoms
+	int lateral_flow_test_on_traced;		  // carry out a lateral flow test on those contacted via contact tracing
+	int lateral_flow_test_order_wait;		  // number of days to wait for a test to be delivered
+	double lateral_flow_test_sensitivity[N_INFECTIOUSNESS_BUCKETS];  // sensitivity of lateral flow test per bucket
+	double lateral_flow_test_specificity;	  // specificity of lateral flow test
+	int lateral_flow_test_repeat_count;		  // number of tests to take, one per day, when advised to do so
 
 	double app_users_fraction[N_AGE_GROUPS];// Proportion of the population that use the app by age
 	int app_turned_on;						// is the app turned on

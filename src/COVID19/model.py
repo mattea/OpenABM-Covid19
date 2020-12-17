@@ -45,6 +45,14 @@ PYTHON_SAFE_UPDATE_PARAMS = [
     "app_users_fraction",
     "trace_on_symptoms",
     "trace_on_positive",
+    "lateral_flow_test_on_symptoms",
+    "lateral_flow_test_on_traced",
+    "lateral_flow_test_order_wait",
+    "lateral_flow_test_sensitivity_asymptomatic",
+    "lateral_flow_test_sensitivity_symptomatic_mild",
+    "lateral_flow_test_sensitivity_symptomatic",
+    "lateral_flow_test_specificity",
+    "lateral_flow_test_repeat_count",
     "lockdown_house_interaction_multiplier",
     "lockdown_random_network_multiplier",
     "lockdown_occupation_multiplier_primary_network",
@@ -165,10 +173,18 @@ class TransmissionTypeEnum(enum.Enum):
     _random = 2
 
 
+class InfectiousnessEnum(enum.Enum):
+    _critical = 0
+    _hospitalised = 1
+    _symptomatic = 2
+    _symptomatic_mild = 3
+    _asymptomatic = 4
+
+
 def _get_base_param_from_enum(param):
     base_name, enum_val = None, None
     for en in chain(
-        AgeGroupEnum, ChildAdultElderlyEnum, ListIndiciesEnum, TransmissionTypeEnum, OccupationNetworkEnum
+        AgeGroupEnum, ChildAdultElderlyEnum, ListIndiciesEnum, TransmissionTypeEnum, OccupationNetworkEnum, InfectiousnessEnum
     ):
         LOGGER.debug(f"{en.name} =={param[-1 * len(en.name) :]} ")
         if en.name == param[-1 * len(en.name) :]:
@@ -851,6 +867,9 @@ class Model:
         )
         results["n_tests"] = covid19.utils_n_total_by_day(
             self.c_model, covid19.TEST_RESULT, int(self.c_model.time) 
+        )
+        results["n_lateral_flow_tests"] = covid19.utils_n_total_by_day(
+            self.c_model, covid19.LATERAL_FLOW_TEST_TAKE, int(self.c_model.time) 
         )
         results["n_symptoms"] = covid19.utils_n_current(
             self.c_model, covid19.SYMPTOMATIC

@@ -416,6 +416,27 @@ void read_param_file( parameters *params)
         if( check < 1){ print_exit("Failed to read parameter priority_test_contacts\n"); };
     }
 
+	check = fscanf(parameter_file, "%i,",   &(params->lateral_flow_test_order_wait));
+	if( check < 1){ print_exit("Failed to read parameter lateral_flow_test_order_wait\n"); };
+    
+    check = fscanf(parameter_file, "%i,",   &(params->lateral_flow_test_on_symptoms));
+    if( check < 1){ print_exit("Failed to read parameter lateral_flow_test_on_symptoms\n"); };
+    
+    check = fscanf(parameter_file, "%i,",   &(params->lateral_flow_test_on_traced));
+    if( check < 1){ print_exit("Failed to read parameter lateral_flow_test_on_traced\n"); };
+    
+	check = fscanf(parameter_file, "%i,",   &(params->lateral_flow_test_repeat_count));
+	if( check < 1){ print_exit("Failed to read parameter lateral_flow_test_repeat_count\n"); };
+
+	check = fscanf(parameter_file, "%lf,",   &(params->lateral_flow_test_specificity));
+	if( check < 1){ print_exit("Failed to read parameter lateral_flow_test_specificity\n"); };
+
+	for( i = 0; i < N_INFECTIOUSNESS_BUCKETS; i++ )
+    {
+        check = fscanf(parameter_file, "%lf,", &(params->lateral_flow_test_sensitivity[i]));
+        if( check < 1){ print_exit("Failed to read parameter lateral_flow_test_sensitivity\n"); };
+    }
+
 	check = fscanf(parameter_file, " %lf ,", &(params->self_quarantine_fraction));
 	if( check < 1){ print_exit("Failed to read parameter self_quarantine_fraction\n"); };
 
@@ -749,6 +770,7 @@ void write_individual_file(model *model, parameters *params)
 	fprintf(individual_output_file,"app_user,");
 	fprintf(individual_output_file,"mean_interactions,");
 	fprintf(individual_output_file,"infection_count,");
+	fprintf(individual_output_file,"lateral_flow_status,");
 	fprintf(individual_output_file,"infectiousness_multiplier");
 	fprintf(individual_output_file,"\n");
 
@@ -767,7 +789,7 @@ void write_individual_file(model *model, parameters *params)
 		infection_count = count_infection_events( indiv );
 
 		fprintf(individual_output_file,
-			"%li,%d,%d,%d,%d,%d,%li,%d,%d,%d,%d,%d,%d,%0.4f\n",
+			"%li,%d,%d,%d,%d,%d,%li,%d,%d,%d,%d,%d,%d,%0.4f,%d\n",
 			indiv->idx,
 			indiv->status,
 			indiv->age_group,
@@ -781,6 +803,7 @@ void write_individual_file(model *model, parameters *params)
 			indiv->app_user,
 			indiv->random_interactions,
 			infection_count,
+			indiv->lateral_flow_test_result,
 			indiv->infectiousness_multiplier
 			);
 	}
