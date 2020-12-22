@@ -748,10 +748,9 @@ int get_param_lateral_flow_test_on_traced(parameters *params)
 *  Name:		get_param_lateral_flow_test_sensitivity
 *  Description: Gets the value of a double parameter
 ******************************************************************************************/
-double get_param_lateral_flow_test_sensitivity(parameters *params, int idx)
+double get_param_lateral_flow_test_sensitivity(parameters *params)
 {
-    if (idx >= N_INFECTIOUSNESS_BUCKETS) return ERROR;
-    return params->lateral_flow_test_sensitivity[idx];
+    return params->lateral_flow_test_sensitivity;
 }
 
 /*****************************************************************************************
@@ -1700,10 +1699,9 @@ int set_param_lateral_flow_test_on_traced(parameters *params, int value)
 *  Name:		set_param_lateral_flow_test_sensitivity
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_lateral_flow_test_sensitivity(parameters *params, double value, int idx)
+int set_param_lateral_flow_test_sensitivity(parameters *params, double value)
 {
-    if (idx >= N_INFECTIOUSNESS_BUCKETS) return ERROR;
-    params->lateral_flow_test_sensitivity[idx] = value;
+    params->lateral_flow_test_sensitivity = value;
     return TRUE;
 }
 

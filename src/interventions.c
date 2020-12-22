@@ -572,6 +572,7 @@ void intervention_lateral_flow_test_order( model *model, individual *indiv, int 
 {
 	if( indiv->lateral_flow_test_result != TEST_ORDERED && !(indiv->infection_events->is_case) )
 	{
+		indiv->lateral_flow_test_capacity = model->params->lateral_flow_test_repeat_count;
         add_individual_to_event_list( model, LATERAL_FLOW_TEST_TAKE, indiv, time );
         indiv->lateral_flow_test_result = TEST_ORDERED;
 	}
@@ -602,8 +603,32 @@ void intervention_lateral_flow_test_take( model *model, individual *indiv )
 		{
 			if( indiv->infection_events->times[INFECTIOUSNESS_BUCKETS[bucket]] > 0 )
 			{
-				// TODO(mattea): Add function based on time_infected.
-				indiv->lateral_flow_test_result = gsl_ran_bernoulli( rng, model->params->lateral_flow_test_sensitivity[bucket] );
+				double sensitivity = 0;
+				double I = 0;
+				double V = 0;
+				const int peak_time = model->event_lists[INFECTIOUSNESS_BUCKETS[bucket]].infectious_peak_time;
+				const double *infectious_curve = model->event_lists[LATERAL_FLOW_TEST].infectious_curve[LATERAL_FLOW_TEST];
+				const double g = 1/8;
+				const double b = 1/4;
+				if( abs(time_infected - peak_time) > 9 )
+				{
+					indiv->lateral_flow_test_result = FALSE;
+					break;
+				}
+				else if( time_infected <= peak_time )
+				{
+					I = infectious_curve[ time_infected ] * indiv->infectiousness_multiplier;
+					V = log( I ) / g;
+				}
+				else
+				{
+					I = infectious_curve[ time_infected ] * indiv->infectiousness_multiplier;
+					V = log( I ) / ( g + b ) + log( infectious_curve[ peak_time ] * indiv->infectiousness_multiplier ) * ( 1/g - 1/( g + b ) );
+				}
+
+				sensitivity = 1 / ( 1 + exp( -log( V ) ) ) * model->params->lateral_flow_test_sensitivity;
+				sensitivity = max( 0, min( 1, sensitivity ) );
+				indiv->lateral_flow_test_result = gsl_ran_bernoulli( rng, sensitivity );
 				break;
 			}
 		}
@@ -833,7 +858,7 @@ void intervention_quarantine_household(
 				intervention_test_order( model, contact, time_test );
 			}
 
-			if( quarantine && params->lateral_flow_test_on_traced && ( index_token->index_status == POSITIVE_TEST ) )
+			if( params->lateral_flow_test_on_traced && ( index_token->index_status == POSITIVE_TEST ) )
 				intervention_lateral_flow_test_order( model, contact, model->time + params->lateral_flow_test_order_wait );
 
 			if( contact_trace && ( params->quarantine_on_traced || params->test_on_traced ) )
@@ -912,13 +937,13 @@ void intervention_index_case_symptoms_to_positive(
 					intervention_quarantine_until( model, contact, index_token->individual, time_quarantine, TRUE, NULL, contact_time, 1 );
 				}
 
-				if( ( contact->quarantine_release_event != NULL ) & ( params->test_on_traced == TRUE ) )
+				if( ( contact->quarantine_release_event != NULL ) && ( params->test_on_traced == TRUE ) )
 				{
 					time_test = max( model->time + params->test_order_wait, contact_time + params->test_insensitive_period );
 					intervention_test_order( model, contact, time_test );
 				}
 
-				if( ( contact->quarantine_release_event != NULL ) & ( params->lateral_flow_test_on_traced == TRUE ) )
+				if( params->lateral_flow_test_on_traced == TRUE )
 					intervention_lateral_flow_test_order( model, contact, model->time + params->lateral_flow_test_order_wait );
 
 				if( trace_household & ( contact->house_no != house_no ) & ( contact->quarantine_release_event != NULL ) )
@@ -1141,7 +1166,7 @@ void intervention_on_traced(
 			intervention_test_order( model, indiv, time_test );
 		}
 
-		if( quarantine && params->lateral_flow_test_on_traced )
+		if( params->lateral_flow_test_on_traced )
 			intervention_lateral_flow_test_order( model, indiv, model->time + params->lateral_flow_test_order_wait );
 
 		if( quarantine && recursion_level != NOT_RECURSIVE )

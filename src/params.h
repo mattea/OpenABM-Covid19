@@ -149,7 +149,7 @@ typedef struct{
 	int lateral_flow_test_on_symptoms;		  // carry out a lateral flow test on those with symptoms
 	int lateral_flow_test_on_traced;		  // carry out a lateral flow test on those contacted via contact tracing
 	int lateral_flow_test_order_wait;		  // number of days to wait for a test to be delivered
-	double lateral_flow_test_sensitivity[N_INFECTIOUSNESS_BUCKETS];  // sensitivity of lateral flow test per bucket
+	double lateral_flow_test_sensitivity;	  // peak sensitivity of lateral flow test
 	double lateral_flow_test_specificity;	  // specificity of lateral flow test
 	int lateral_flow_test_repeat_count;		  // number of tests to take, one per day, when advised to do so
 

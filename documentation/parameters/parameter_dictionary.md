@@ -175,9 +175,7 @@
 | `lateral_flow_test_repeat_count` | 7 | - | Number of daily Lateral Flow Assay tests to take in a row | - |
 | `lateral_flow_test_on_symptoms` | 0 | - | Test individuals with Lateral Flow Assay who show symptoms (0=no, 1=yes) | - |
 | `lateral_flow_test_on_traced` | 0 | - | Test individuals with Lateral Flow Assay who have been contact-traced (0=no, 1=yes) | - |
-| `lateral_flow_test_sensitivity_symptomatic` | 0.95 | - | Peak sensitivity of Lateral Flow Assay for symptomatic individuals | - |
-| `lateral_flow_test_sensitivity_symptomatic_mild` | 0.8 | - | Peak sensitivity of Lateral Flow Assay for mildly symptomatic individuals | - |
-| `lateral_flow_test_sensitivity_asymptomatic` | 0.7 | - | Peak sensitivity of Lateral Flow Assay for asymptomatic individuals | - |
+| `lateral_flow_test_sensitivity` | 0.95 | - | Peak sensitivity of Lateral Flow Assay | - |
 | `lateral_flow_test_specificity` | 0.999 | - | Specificity of Lateral Flow Assay (at any time) | - |
 | `self_quarantine_fraction` | 0 | - | Proportion of people who self-quarantine upon symptoms | - |
 | `app_users_fraction_0_9` | 0.09 | - | Maximum fraction of the population with smartphones aged 0-9 | OFCOM 3-5 year olds |

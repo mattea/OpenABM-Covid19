@@ -1343,6 +1343,7 @@ int one_time_step( model *model )
 
 	while( ( n_daily( model, TEST_TAKE, model->time ) > 0 ) ||
 		   ( n_daily( model, TEST_RESULT, model->time ) > 0 ) ||
+		   ( n_daily( model, LATERAL_FLOW_TEST_TAKE, model->time ) > 0 ) ||
 		   ( n_daily( model, MANUAL_CONTACT_TRACING, model->time ) > 0 )
 	)
 	{

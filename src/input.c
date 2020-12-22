@@ -254,7 +254,7 @@ void read_param_file( parameters *params)
 			if( check < 1){ print_exit("Failed to read parameter relative_susceptibility\n"); };
 		}
 
-	for( i = 0; i < N_INTERACTION_TYPES - N_HOSPITAL_INTERACTION_TYPES; i++ )
+	for( i = 0; i < N_NETWORK_INTERACTION_TYPES; i++ )
 	{
 		check = fscanf(parameter_file, " %lf ,", &(params->relative_transmission[i]));
 		if( check < 1){ print_exit("Failed to read parameter relative_transmission_**\n"); };
@@ -431,11 +431,8 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, "%lf,",   &(params->lateral_flow_test_specificity));
 	if( check < 1){ print_exit("Failed to read parameter lateral_flow_test_specificity\n"); };
 
-	for( i = 0; i < N_INFECTIOUSNESS_BUCKETS; i++ )
-    {
-        check = fscanf(parameter_file, "%lf,", &(params->lateral_flow_test_sensitivity[i]));
-        if( check < 1){ print_exit("Failed to read parameter lateral_flow_test_sensitivity\n"); };
-    }
+	check = fscanf(parameter_file, "%lf,",   &(params->lateral_flow_test_sensitivity));
+	if( check < 1){ print_exit("Failed to read parameter lateral_flow_test_sensitivity\n"); };
 
 	check = fscanf(parameter_file, " %lf ,", &(params->self_quarantine_fraction));
 	if( check < 1){ print_exit("Failed to read parameter self_quarantine_fraction\n"); };
@@ -564,7 +561,7 @@ void read_hospital_param_file( parameters *params)
 	check = fscanf( hospital_parameter_file, " %lf ,", &( params->critical_waiting_mod ) );
 	if( check < 1 ){ print_exit( "Failed to read parameter critical_waiting_mod\n" ); };
 
-	for( i = N_INTERACTION_TYPES - N_HOSPITAL_INTERACTION_TYPES; i < N_INTERACTION_TYPES; i++ )
+	for( i = N_NETWORK_INTERACTION_TYPES; i < N_NETWORK_INTERACTION_TYPES + N_HOSPITAL_INTERACTION_TYPES; i++ )
 	{
 		check = fscanf(hospital_parameter_file, " %lf ,", &(params->relative_transmission[i]));
 		if( check < 1){ print_exit("Failed to read parameter relative_transmission_**\n"); };
@@ -770,8 +767,8 @@ void write_individual_file(model *model, parameters *params)
 	fprintf(individual_output_file,"app_user,");
 	fprintf(individual_output_file,"mean_interactions,");
 	fprintf(individual_output_file,"infection_count,");
-	fprintf(individual_output_file,"lateral_flow_status,");
-	fprintf(individual_output_file,"infectiousness_multiplier");
+	fprintf(individual_output_file,"infectiousness_multiplier,");
+	fprintf(individual_output_file,"lateral_flow_status");
 	fprintf(individual_output_file,"\n");
 
 	// Loop through all individuals in the simulation
@@ -803,8 +800,8 @@ void write_individual_file(model *model, parameters *params)
 			indiv->app_user,
 			indiv->random_interactions,
 			infection_count,
-			indiv->lateral_flow_test_result,
-			indiv->infectiousness_multiplier
+			indiv->infectiousness_multiplier,
+			indiv->lateral_flow_test_result
 			);
 	}
 	fclose(individual_output_file);
