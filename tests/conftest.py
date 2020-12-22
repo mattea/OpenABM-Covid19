@@ -68,5 +68,5 @@ def setup_covid_methods(request):
         """
         At the end of each method (test), remove the directory of test input/output data
         """
-        #shutil.rmtree(constant.DATA_DIR_TEST, ignore_errors=True)
+        shutil.rmtree(constant.DATA_DIR_TEST, ignore_errors=True)
     request.addfinalizer(fin)

@@ -56,13 +56,13 @@ model* new_model( parameters *params )
     rng = gsl_rng_alloc ( gsl_rng_default);
     gsl_rng_set( rng, params->rng_seed );
 
+	set_up_population( model_ptr );
 	update_intervention_policy( model_ptr, model_ptr->time );
 
 	model_ptr->event_lists = calloc( N_EVENT_TYPES, sizeof( event_list ) );
 	for( type = 0; type < N_EVENT_TYPES;  type++ )
 		set_up_event_list( model_ptr, params, type );
 
-	set_up_population( model_ptr );
 	set_up_household_distribution( model_ptr );
 	set_up_allocate_work_places( model_ptr );
 	if( params->hospital_on )

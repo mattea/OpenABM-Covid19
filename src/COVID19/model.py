@@ -171,18 +171,10 @@ class TransmissionTypeEnum(enum.Enum):
     _random = 2
 
 
-class InfectiousnessEnum(enum.Enum):
-    _critical = 0
-    _hospitalised = 1
-    _symptomatic = 2
-    _symptomatic_mild = 3
-    _asymptomatic = 4
-
-
 def _get_base_param_from_enum(param):
     base_name, enum_val = None, None
     for en in chain(
-        AgeGroupEnum, ChildAdultElderlyEnum, ListIndiciesEnum, TransmissionTypeEnum, OccupationNetworkEnum, InfectiousnessEnum
+        AgeGroupEnum, ChildAdultElderlyEnum, ListIndiciesEnum, TransmissionTypeEnum, OccupationNetworkEnum
     ):
         LOGGER.debug(f"{en.name} =={param[-1 * len(en.name) :]} ")
         if en.name == param[-1 * len(en.name) :]:

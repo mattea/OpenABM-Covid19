@@ -1984,7 +1984,7 @@ class TestClass(object):
         np.testing.assert_equal( p_val > lower_CI, True, "Too few false positives given the test specificity" )
         np.testing.assert_equal( p_val < upper_CI, True, "Too many false positives given the test specificity" )
 
-        # check the sensitivity in the initial period when not sensitive
+        # check the specificity in the initial period when not sensitive
         false_neg  = sum( ( df_test["infected"] == True ) & ( df_test["test_status"] == 0 ) & ( df_test["test_sensitive"] == False ))
         true_pos   = sum( ( df_test["infected"] == True ) & ( df_test["test_status"] == 1 ) & ( df_test["test_sensitive"] == False ))
         p_val      = binom.cdf( false_neg, ( false_neg + true_pos ), test_params[ "test_specificity"] )
@@ -1993,7 +1993,7 @@ class TestClass(object):
         np.testing.assert_equal( p_val > lower_CI, True, "Too true positives in insensitive period given the test specificity" )
         np.testing.assert_equal( p_val < upper_CI, True, "Too few true positives in insensitive period the test specificity" )
 
-        # check the sensitivity in the initial period when not sensitive
+        # check the sensitivity in the sensitive period
         false_neg  = sum( ( df_test["infected"] == True ) & ( df_test["test_status"] == 0 ) & ( df_test["test_sensitive"] == True ))
         true_pos   = sum( ( df_test["infected"] == True ) & ( df_test["test_status"] == 1 ) & ( df_test["test_sensitive"] == True ))
         p_val      = binom.cdf( true_pos, ( false_neg + true_pos ), test_params[ "test_sensitivity"] )
@@ -2041,11 +2041,10 @@ class TestClass(object):
         df_test.fillna(-1, inplace=True)
         df_test["infected"] = (df_test["time_infected"]>-1)
 
-        # TODO(mattea): Find correct symptomatic.
         # work out whether test is sensitive based on time of infected and whether showing symptoms     
-        df_test[ "test_sensitive_inf" ]  = ( ( df_test["time_infected"] != - 1 ) & ( df_test["time_infected"] <= end_time ) )
-        df_test[ "test_sensitive_symp" ] = ( ( df_test["time_symptomatic"] <= end_time ) & ( df_test["time_symptomatic"] >= 0 ) )
-        df_test[ "test_sensitive" ] = ( df_test[ "test_sensitive_inf" ] | df_test[ "test_sensitive_symp" ] )
+        #df_test[ "test_sensitive_inf" ]  = ( ( df_test["time_infected"] != - 1 ) & ( df_test["time_infected"] <= end_time ) )
+        #df_test[ "test_sensitive_symp" ] = ( ( df_test["time_symptomatic"] <= end_time ) & ( df_test["time_symptomatic"] >= 0 ) )
+        #df_test[ "test_sensitive" ] = ( df_test[ "test_sensitive_inf" ] | df_test[ "test_sensitive_symp" ] )
 
         # check the specificity of the test
         true_neg  = sum( ( df_test["infected"] == False ) & ( df_test["lateral_flow_status"] == 0 ) )
@@ -2053,27 +2052,29 @@ class TestClass(object):
         p_val     = binom.cdf( true_neg, ( true_neg + false_pos ), test_params[ "lateral_flow_test_specificity"] )
         np.testing.assert_equal( true_neg > 100, True, "In-sufficient true negatives cases to test" )
         np.testing.assert_equal( false_pos > 50, True, "In-sufficient false positives cases to test" )
-        np.testing.assert_equal( p_val > lower_CI, True, "Too few false positives given the test specificity" )
-        np.testing.assert_equal( p_val < upper_CI, True, "Too many false positives given the test specificity" )
+        np.testing.assert_equal( p_val > lower_CI, True, f"Too few false positives given the test specificity tn={true_neg}, fp={false_pos}, p={p_val}" )
+        np.testing.assert_equal( p_val < upper_CI, True, f"Too many false positives given the test specificity tn={true_neg}, fp={false_pos}, p={p_val}" )
 
-        # check the sensitivity in the initial period when not sensitive
-        false_neg  = sum( ( df_test["infected"] == True ) & ( df_test["lateral_flow_status"] == 0 ) & ( df_test["test_sensitive"] == False ))
-        true_pos   = sum( ( df_test["infected"] == True ) & ( df_test["lateral_flow_status"] == 1 ) & ( df_test["test_sensitive"] == False ))
-        p_val      = binom.cdf( false_neg, ( false_neg + true_pos ), test_params[ "lateral_flow_test_specificity"] )
-        np.testing.assert_equal( false_neg > 50, True, "In-sufficient false negatives in insensitive period to test" )
-        np.testing.assert_equal( true_pos > 5, True, "In-sufficient true positives in insensitive period to test" )
-        np.testing.assert_equal( p_val > lower_CI, True, "Too true positives in insensitive period given the test specificity" )
-        np.testing.assert_equal( p_val < upper_CI, True, "Too few true positives in insensitive period the test specificity" )
+        # Check the sensitivity is monotonic on each side of the peak.
+        df_test[ "test_sensitive_inf" ]  = ( ( df_test["time_infected"] != - 1 ) & ( df_test["time_infected"] <= end_time ) )
+        df_test[ "time_since_inf" ]  = ( end_time - df_test["time_infected"] )
 
-        # check the sensitivity in the initial period when not sensitive
-        false_neg  = sum( ( df_test["infected"] == True ) & ( df_test["lateral_flow_status"] == 0 ) & ( df_test["test_sensitive"] == True ))
-        true_pos   = sum( ( df_test["infected"] == True ) & ( df_test["lateral_flow_status"] == 1 ) & ( df_test["test_sensitive"] == True ))
-        p_val      = binom.cdf( true_pos, ( false_neg + true_pos ), test_params[ "lateral_flow_test_sensitivity"] )
-        np.testing.assert_equal( false_neg > 100, True, "In-sufficient false negatives in sensitive period to test" )
-        np.testing.assert_equal( true_pos > 100, True, "In-sufficient true positives in sensitive period to test" )
-        np.testing.assert_equal( p_val > lower_CI, True, "Too few true positives in sensitive period given the test sensitivity" )
-        np.testing.assert_equal( p_val < upper_CI, True, "Too many true positives in sensitive period the test sensitivity" )
+        true_pos   = df_test[ ( df_test["infected"] == True ) & ( df_test["lateral_flow_status"] == 1 ) & ( df_test["test_sensitive_inf"] == True ) ].groupby( [ "time_since_inf" ] ).size()
+        false_neg  = df_test[ ( df_test["infected"] == True ) & ( df_test["lateral_flow_status"] == 0 ) & ( df_test["test_sensitive_inf"] == True ) ].groupby( [ "time_since_inf" ] ).size()
+        sens_ratio = true_pos.divide(false_neg.add(true_pos, fill_value=0), fill_value=0)
+        sens_peak  = sens_ratio.idxmax()
+        print(f"true pos\n{true_pos}")
+        print(f"false neg\n{false_neg}")
+        np.testing.assert_equal( sens_ratio, False, "Test sens_ratio" )
 
+        #p_val = binom.cdf( true_pos[sens_peak], ( false_neg[sens_peak] + true_pos[sens_peak]), test_params[ "lateral_flow_test_sensitivity"] )
+        #np.testing.assert_equal( false_neg > 100, True, "In-sufficient false negatives in sensitive period to test" )
+        #np.testing.assert_equal( true_pos > 100, True, "In-sufficient true positives in sensitive period to test" )
+        #np.testing.assert_equal( p_val > lower_CI, True, f"Too few true positives in sensitive period given the test sensitivity tn={true_neg}, fp={false_pos}, p={p_val}" )
+        #np.testing.assert_equal( p_val < upper_CI, True, f"Too many true positives in sensitive period the test sensitivity tn={true_neg}, fp={false_pos}, p={p_val}" )
+
+        is_sens_single_peak = np.all(sens_ratio[:sens_peak+1].diff()[1:] >= 0) & np.all(sens_ratio[sens_peak:].diff()[1:] <= 0)
+        np.testing.assert_equal( is_sens_single_peak, True, f"Sensitivity does not have a single peak: {sens_ratio}" )
         del( model )
         
     def test_recursive_testing_indirect_release(self, test_params ):

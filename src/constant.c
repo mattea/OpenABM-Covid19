@@ -101,11 +101,4 @@ const int NEWLY_INFECTED_STATES[N_NEWLY_INFECTED_STATES] = {
 	ASYMPTOMATIC,
 };
 
-// Infectiousness buckets from greatest to least severity.
-const int INFECTIOUSNESS_BUCKETS[N_INFECTIOUSNESS_BUCKETS] = {
-	SYMPTOMATIC,
-	SYMPTOMATIC_MILD,
-	ASYMPTOMATIC,
-};
-
 gsl_rng * rng;

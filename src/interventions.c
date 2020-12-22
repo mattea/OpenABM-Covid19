@@ -352,6 +352,12 @@ void update_intervention_policy( model *model, int time )
 		model->manual_trace_interview_quota = params->manual_trace_n_workers * params->manual_trace_interviews_per_worker_day;
 		model->manual_trace_notification_quota = params->manual_trace_n_workers * params->manual_trace_notifications_per_worker_day;
 	}
+
+	for( int idx = 0; idx < model->params->n_total; idx++ )
+	{
+		if( model->population[ idx ].lateral_flow_test_result >= 0 )
+			model->population[ idx ].lateral_flow_test_result = NO_TEST;
+	}
 }
 
 /*****************************************************************************************
@@ -599,14 +605,14 @@ void intervention_lateral_flow_test_take( model *model, individual *indiv )
 	{
 		time_infected   = model->time - time_infected;
 
-		for(int bucket = 0; bucket < N_INFECTIOUSNESS_BUCKETS; bucket++)
+		for(int bucket = 0; bucket < N_NEWLY_INFECTED_STATES; bucket++)
 		{
-			if( indiv->infection_events->times[INFECTIOUSNESS_BUCKETS[bucket]] > 0 )
+			if( indiv->infection_events->times[NEWLY_INFECTED_STATES[bucket]] > 0 )
 			{
 				double sensitivity = 0;
 				double I = 0;
 				double V = 0;
-				const int peak_time = model->event_lists[INFECTIOUSNESS_BUCKETS[bucket]].infectious_peak_time;
+				const int peak_time = model->event_lists[NEWLY_INFECTED_STATES[bucket]].infectious_peak_time;
 				const double *infectious_curve = model->event_lists[LATERAL_FLOW_TEST].infectious_curve[LATERAL_FLOW_TEST];
 				const double g = 1/8;
 				const double b = 1/4;
@@ -626,7 +632,7 @@ void intervention_lateral_flow_test_take( model *model, individual *indiv )
 					V = log( I ) / ( g + b ) + log( infectious_curve[ peak_time ] * indiv->infectiousness_multiplier ) * ( 1/g - 1/( g + b ) );
 				}
 
-				sensitivity = 1 / ( 1 + exp( -log( V ) ) ) * model->params->lateral_flow_test_sensitivity;
+				sensitivity = 1 / ( 1 + exp( 20 * (0.5 - log(V)) ) ) * model->params->lateral_flow_test_sensitivity;
 				sensitivity = max( 0, min( 1, sensitivity ) );
 				indiv->lateral_flow_test_result = gsl_ran_bernoulli( rng, sensitivity );
 				break;
