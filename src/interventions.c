@@ -603,42 +603,47 @@ void intervention_lateral_flow_test_take( model *model, individual *indiv )
 
 	if( time_infected != UNKNOWN )
 	{
-		time_infected   = model->time - time_infected;
-
+		int infection_type = 0;
 		for(int bucket = 0; bucket < N_NEWLY_INFECTED_STATES; bucket++)
 		{
-			if( indiv->infection_events->times[NEWLY_INFECTED_STATES[bucket]] > 0 )
-			{
-				double sensitivity = 0;
-				double I = 0;
-				double V = 0;
-				const int peak_time = model->event_lists[NEWLY_INFECTED_STATES[bucket]].infectious_peak_time;
-				const double *infectious_curve = model->event_lists[LATERAL_FLOW_TEST].infectious_curve[LATERAL_FLOW_TEST];
-				const double g = 1/8;
-				const double b = 1/4;
-				if( time_infected <= peak_time )
-				{
-					I = infectious_curve[ time_infected ] * indiv->infectiousness_multiplier;
-					V = log( I ) / g;
-				}
-				else
-				{
-					I = infectious_curve[ time_infected ] * indiv->infectiousness_multiplier;
-					V = log( I ) / ( g + b ) + log( infectious_curve[ peak_time ] * indiv->infectiousness_multiplier ) * ( 1/g - 1/( g + b ) );
-				}
-
-				if ( V < 0 )
-				{
-					indiv->lateral_flow_test_result = gsl_ran_bernoulli( rng, 1 - model->params->lateral_flow_test_specificity );
-					break;
-				}
-
-				sensitivity = 1 / ( 1 + exp( V ) ) * model->params->lateral_flow_test_sensitivity;
-				sensitivity = max( 0, min( 1, sensitivity ) );
-				printf("Lateral flow test it %d, pt %d, ic %0.4f, im %0.4f, s %0.4f\n", time_infected, peak_time, infectious_curve[time_infected], indiv->infectiousness_multiplier, sensitivity);
-				indiv->lateral_flow_test_result = gsl_ran_bernoulli( rng, sensitivity );
+			infection_type = NEWLY_INFECTED_STATES[bucket];
+			if( indiv->infection_events->times[NEWLY_INFECTED_STATES[bucket]] == time_infected )
 				break;
-			}
+		}
+
+		time_infected = model->time - time_infected;
+
+		const double infectious_factor = 1/.0802 * 2;
+
+		double sensitivity = 0;
+		double I = 0;
+		double V = 0;
+		const int peak_time = model->event_lists[LATERAL_FLOW_TEST].infectious_peak_time;
+		const double *infectious_curve = model->event_lists[infection_type].infectious_curve[LATERAL_FLOW_TEST];
+		const double g = 1.0/8;
+
+		const double b = 1.0/4;
+		if( time_infected <= peak_time )
+		{
+		  I = infectious_curve[ time_infected ] * indiv->infectiousness_multiplier * infectious_factor;
+		  V = log( I ) / g;
+		}
+		else
+		{
+		I = infectious_curve[ time_infected ] * indiv->infectiousness_multiplier * infectious_factor;
+		V = log( I ) / ( g + b ) + log( infectious_curve[ peak_time ] * indiv->infectiousness_multiplier * infectious_factor ) * ( 1/g - 1/( g + b ) );
+		}
+
+		if ( V < 0 )
+		{
+			indiv->lateral_flow_test_result = gsl_ran_bernoulli( rng, 1 - model->params->lateral_flow_test_specificity );
+		}
+		else
+		{
+			sensitivity = 1 / ( 1 + exp( -V ) ) * model->params->lateral_flow_test_sensitivity;
+			sensitivity = max( 0, min( 1, sensitivity ) );
+			// printf("Lateral flow test it %d, pt %d, ict %0.4f, icp %0.4f, im %0.4f, I %0.4f, V %0.4f, s %0.4f\n", time_infected, peak_time, infectious_curve[time_infected], infectious_curve[peak_time], indiv->infectiousness_multiplier, I, V, sensitivity);
+			indiv->lateral_flow_test_result = gsl_ran_bernoulli( rng, sensitivity );
 		}
 	}
 	else

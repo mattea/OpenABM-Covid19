@@ -788,8 +788,8 @@ class TestClass(object):
                     lateral_flow_test_on_traced = True,
                     lateral_flow_test_order_wait = 1,
                     lateral_flow_test_repeat_count = 7,
-                    lateral_flow_test_sensitivity = 0.95,
-                    lateral_flow_test_specificity = 0.99,
+                    lateral_flow_test_sensitivity = 0.7,
+                    lateral_flow_test_specificity = 0.9,
                 ),
             )
         ],
@@ -2057,17 +2057,21 @@ class TestClass(object):
         true_pos   = df_test[ ( df_test["infected"] == True ) & ( df_test["lateral_flow_status"] == 1 ) & ( df_test["test_sensitive_inf"] == True ) ].groupby( [ "time_since_inf" ] ).size()
         false_neg  = df_test[ ( df_test["infected"] == True ) & ( df_test["lateral_flow_status"] == 0 ) & ( df_test["test_sensitive_inf"] == True ) ].groupby( [ "time_since_inf" ] ).size()
         sens_ratio = true_pos.divide(false_neg.add(true_pos, fill_value=0), fill_value=0)
-        sens_peak  = sens_ratio.idxmax()
+        sens_peak  = sens_ratio.argmax()
         print(f"true pos\n{true_pos}")
         print(f"false neg\n{false_neg}")
+        print(f"sens ratio\n{sens_ratio}")
 
-        is_sens_single_peak = np.all(sens_ratio[:sens_peak+1].diff()[1:] >= 0) & np.all(sens_ratio[sens_peak:].diff()[1:] <= 0)
-        np.testing.assert_equal( is_sens_single_peak, True, f"Sensitivity does not have a single peak: {sens_ratio}" )
+        sens_diff = sens_ratio.diff()
+        is_sens_single_peak = np.all(sens_diff.iloc[2:sens_peak+1] >= 0) & np.all(sens_diff[sens_peak+1:-1] <= 0)
+        np.testing.assert_equal( is_sens_single_peak, True, f"Sensitivity does not have a single peak: {sens_diff}" )
 
         # check the sensitivity at the peak.
-        p_val = binom.cdf( true_pos[sens_peak], ( false_neg[sens_peak] + true_pos[sens_peak]), test_params[ "lateral_flow_test_sensitivity"] )
-        np.testing.assert_equal( false_neg > 100, True, "In-sufficient false negatives in sensitive period to test" )
-        np.testing.assert_equal( true_pos > 100, True, "In-sufficient true positives in sensitive period to test" )
+        # TODO(mattea): Find only symptomatic people.
+        sens_peak_idx  = sens_ratio.idxmax()
+        p_val = binom.cdf( true_pos[sens_peak_idx], ( false_neg[sens_peak_idx] + true_pos[sens_peak_idx]), test_params[ "lateral_flow_test_sensitivity"] )
+        np.testing.assert_equal( false_neg[sens_peak_idx] > 100, True, "In-sufficient false negatives in sensitive period to test" )
+        np.testing.assert_equal( true_pos[sens_peak_idx] > 100, True, "In-sufficient true positives in sensitive period to test" )
         np.testing.assert_equal( p_val > lower_CI, True, f"Too few true positives in sensitive period given the test sensitivity tn={true_neg}, fp={false_pos}, p={p_val}" )
         np.testing.assert_equal( p_val < upper_CI, True, f"Too many true positives in sensitive period the test sensitivity tn={true_neg}, fp={false_pos}, p={p_val}" )
         del( model )
