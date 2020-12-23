@@ -250,6 +250,10 @@ int get_model_param_manual_trace_interviews_per_worker_day( model *pmodel );
 int get_model_param_manual_trace_notifications_per_worker_day( model *pmodel );
 double get_model_param_manual_traceable_fraction( model *pmodel, int );
 double get_model_param_fatality_fraction( model *pmodel, int age_group );
+int get_model_param_lateral_flow_test_on_symptoms(model *pmodel);
+int get_model_param_lateral_flow_test_on_traced(model *pmodel);
+int get_model_param_lateral_flow_test_order_wait(model *pmodel);
+int get_model_param_lateral_flow_test_repeat_count(model *pmodel);
 
 int set_model_param_quarantine_days(model *pmodel, int value);
 int set_model_param_self_quarantine_fraction(model *pmodel, double value);
@@ -290,6 +294,10 @@ int set_model_param_manual_trace_n_workers( model *pmodel, int value );
 int set_model_param_manual_trace_interviews_per_worker_day( model *pmodel, int value );
 int set_model_param_manual_trace_notifications_per_worker_day( model *pmodel, int value );
 int set_model_param_manual_traceable_fraction( model *pmodel, double value, int type );
+int set_model_param_lateral_flow_test_on_symptoms( model *pmodel, int value );
+int set_model_param_lateral_flow_test_on_traced( model *pmodel, int value );
+int set_model_param_lateral_flow_test_order_wait( model *pmodel, int value );
+int set_model_param_lateral_flow_test_repeat_count( model *pmodel, int value );
 
 int set_model_param_risk_score( model*, int, int, int, double );
 int set_model_param_risk_score_household( model*, int, int, double );

@@ -533,6 +533,42 @@ int get_model_param_priority_test_contacts(model *model, int idx)
 }
 
 /*****************************************************************************************
+*  Name:		get_model_param_lateral_flow_test_on_symptoms
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_model_param_lateral_flow_test_on_symptoms(model *model)
+{
+    return model->params->lateral_flow_test_on_symptoms;
+}
+
+/*****************************************************************************************
+*  Name:		get_model_param_lateral_flow_test_on_traced
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_model_param_lateral_flow_test_on_traced(model *model)
+{
+    return model->params->lateral_flow_test_on_traced;
+}
+
+/*****************************************************************************************
+*  Name:		get_model_param_lateral_flow_test_order_wait
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_model_param_lateral_flow_test_order_wait(model *model)
+{
+    return model->params->lateral_flow_test_order_wait;
+}
+
+/*****************************************************************************************
+*  Name:		get_model_param_lateral_flow_test_repeat_count
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_model_param_lateral_flow_test_repeat_count(model *model)
+{
+    return model->params->lateral_flow_test_repeat_count;
+}
+
+/*****************************************************************************************
 *  Name:		get_model_param_app_users_fraction
 *  Description: Gets the value of double parameter
 ******************************************************************************************/
@@ -916,6 +952,47 @@ int set_model_param_priority_test_contacts( model *model, int value, int idx )
 	model->params->priority_test_contacts[idx] = value;
 	return TRUE;
 }
+
+/*****************************************************************************************
+*  Name:		set_model_param_lateral_flow_test_on_symptoms
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_lateral_flow_test_on_symptoms(model *model, int value)
+{
+   model->params->lateral_flow_test_on_symptoms = value;
+   return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_model_param_lateral_flow_test_on_traced
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_lateral_flow_test_on_traced(model *model, int value)
+{
+    model->params->lateral_flow_test_on_traced = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_model_param_lateral_flow_test_order_wait
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_lateral_flow_test_order_wait(model *model, int value)
+{
+    model->params->lateral_flow_test_order_wait = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_model_param_lateral_flow_test_repeat_count
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_lateral_flow_test_repeat_count(model *model, int value)
+{
+    model->params->lateral_flow_test_repeat_count = value;
+    return TRUE;
+}
+
 /*****************************************************************************************
 *  Name:		set_model_param_app_users_fraction
 *  Description: Sets the value of parameter
