@@ -915,7 +915,7 @@ class Model:
             self.c_model, covid19.LATERAL_FLOW_TEST_TAKE, int(self.c_model.time) 
         )
         if results["n_lateral_flow_tests"] > 0:
-            results["mean_lfa_sensitivity"] = covid19.calculate_mean_lfa_sensitivity( self.c_model, self.c_model.time )
+            results["mean_lfa_sensitivity"] = covid19.calculate_mean_lfa_sensitivity( self.c_model )
         else:
             results["mean_lfa_sensitivity"] = -1
 

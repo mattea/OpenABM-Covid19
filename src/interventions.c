@@ -668,10 +668,10 @@ void intervention_lateral_flow_test_take( model *model, individual *indiv )
 
 /*****************************************************************************************
 *  Name:		calculate_mean_lfa_sensitivity
-*  Description: Calculates the mean sensitivity for Lateral Flow tests on this date.
+*  Description: Calculates the mean sensitivity for Lateral Flow tests for today.
 *  Returns:		double
 ******************************************************************************************/
-double calculate_mean_lfa_sensitivity( model *model, int time )
+double calculate_mean_lfa_sensitivity( model *model )
 {
 	double total = 0;
 	long cnt = 0;
