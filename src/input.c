@@ -428,11 +428,11 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, "%i,",   &(params->lateral_flow_test_repeat_count));
 	if( check < 1){ print_exit("Failed to read parameter lateral_flow_test_repeat_count\n"); };
 
-	check = fscanf(parameter_file, "%lf,",   &(params->lateral_flow_test_specificity));
-	if( check < 1){ print_exit("Failed to read parameter lateral_flow_test_specificity\n"); };
-
 	check = fscanf(parameter_file, "%lf,",   &(params->lateral_flow_test_sensitivity));
 	if( check < 1){ print_exit("Failed to read parameter lateral_flow_test_sensitivity\n"); };
+
+	check = fscanf(parameter_file, "%lf,",   &(params->lateral_flow_test_specificity));
+	if( check < 1){ print_exit("Failed to read parameter lateral_flow_test_specificity\n"); };
 
 	check = fscanf(parameter_file, " %lf ,", &(params->self_quarantine_fraction));
 	if( check < 1){ print_exit("Failed to read parameter self_quarantine_fraction\n"); };

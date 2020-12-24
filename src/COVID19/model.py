@@ -858,9 +858,6 @@ class Model:
         results["n_tests"] = covid19.utils_n_total_by_day(
             self.c_model, covid19.TEST_RESULT, int(self.c_model.time) 
         )
-        results["n_lateral_flow_tests"] = covid19.utils_n_total_by_day(
-            self.c_model, covid19.LATERAL_FLOW_TEST_TAKE, int(self.c_model.time) 
-        )
         results["n_symptoms"] = covid19.utils_n_current(
             self.c_model, covid19.SYMPTOMATIC
         ) + covid19.utils_n_current(self.c_model, covid19.SYMPTOMATIC_MILD)
@@ -913,6 +910,14 @@ class Model:
         results["R_inst"] = covid19.calculate_R_instanteous( self.c_model, self.c_model.time, 0.5 )
         results["R_inst_05"] = covid19.calculate_R_instanteous( self.c_model, self.c_model.time, 0.05 )
         results["R_inst_95"] = covid19.calculate_R_instanteous( self.c_model, self.c_model.time, 0.95 )
+
+        results["n_lateral_flow_tests"] = covid19.utils_n_total_by_day(
+            self.c_model, covid19.LATERAL_FLOW_TEST_TAKE, int(self.c_model.time) 
+        )
+        if results["n_lateral_flow_tests"] > 0:
+            results["mean_lfa_sensitivity"] = covid19.calculate_mean_lfa_sensitivity( self.c_model, self.c_model.time )
+        else:
+            results["mean_lfa_sensitivity"] = -1
 
         return results
 

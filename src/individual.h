@@ -47,6 +47,7 @@ struct individual{
 	int quarantine_test_result;
 	int lateral_flow_test_result;
 	int lateral_flow_test_capacity;
+	double lateral_flow_test_sensitivity;
 	
 	trace_token *trace_tokens;
 	trace_token *index_trace_token;

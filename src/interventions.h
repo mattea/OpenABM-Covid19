@@ -36,7 +36,7 @@ void destroy_risk_scores( model* );
 void update_intervention_policy( model*, int );
 
 void set_up_trace_tokens( model* );
-trace_token* new_trace_token( model*, individual*, int );
+trace_token* create_trace_token( model*, individual*, int );
 trace_token* index_trace_token( model*, individual* );
 void remove_one_trace_token( model*, trace_token* );
 void remove_traced_on_this_trace( model*, individual* );
@@ -59,6 +59,7 @@ void intervention_on_positive_result( model*, individual* );
 void intervention_on_traced( model*, individual*, int, int, trace_token*, double, int );
 void intervention_lateral_flow_test_order( model*, individual*, int );
 void intervention_lateral_flow_test_take( model*, individual* );
+double calculate_mean_lfa_sensitivity( model *, int );
 
 void intervention_smart_release( model* );
 int resolve_quarantine_reasons(int *);

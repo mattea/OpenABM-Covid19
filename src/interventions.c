@@ -153,11 +153,11 @@ void set_up_trace_tokens( model *model )
 }
 
 /*****************************************************************************************
-*  Name:		new_trace_token
+*  Name:		create_trace_token
 *  Description: gets a new trace token
 *  Returns:		void
 ******************************************************************************************/
-trace_token* new_trace_token( model *model, individual *indiv, int contact_time )
+trace_token* create_trace_token( model *model, individual *indiv, int contact_time )
 {
 	trace_token *token = model->next_trace_token;
 
@@ -190,7 +190,7 @@ trace_token* index_trace_token( model *model, individual *indiv )
 {
 	if( indiv->index_trace_token == NULL )
 	{
-		indiv->index_trace_token = new_trace_token( model, indiv, model->time );
+		indiv->index_trace_token = create_trace_token( model, indiv, model->time );
 		indiv->index_trace_token->contact_time = model->time;
 	}
 
@@ -356,7 +356,10 @@ void update_intervention_policy( model *model, int time )
 	for( int idx = 0; idx < model->params->n_total; idx++ )
 	{
 		if( model->population[ idx ].lateral_flow_test_result >= 0 )
+		{
 			model->population[ idx ].lateral_flow_test_result = NO_TEST;
+			model->population[ idx ].lateral_flow_test_sensitivity = NO_TEST;
+		}
 	}
 }
 
@@ -439,7 +442,7 @@ int intervention_quarantine_until(
 	if( index_token != NULL && indiv->traced_on_this_trace == 0 )
 	{
 		// add the trace token to their list
-		trace_token *token = new_trace_token( model, indiv, contact_time );
+		trace_token *token = create_trace_token( model, indiv, contact_time );
 		token->index_status = index_token->index_status;
 		token->traced_from  = trace_from;
 
@@ -642,6 +645,7 @@ void intervention_lateral_flow_test_take( model *model, individual *indiv )
 		{
 			sensitivity = 1 / ( 1 + exp( -V ) ) * model->params->lateral_flow_test_sensitivity;
 			sensitivity = max( 0, min( 1, sensitivity ) );
+			indiv->lateral_flow_test_sensitivity = sensitivity;
 			// printf("Lateral flow test it %d, pt %d, ict %0.4f, icp %0.4f, im %0.4f, I %0.4f, V %0.4f, s %0.4f\n", time_infected, peak_time, infectious_curve[time_infected], infectious_curve[peak_time], indiv->infectiousness_multiplier, I, V, sensitivity);
 			indiv->lateral_flow_test_result = gsl_ran_bernoulli( rng, sensitivity );
 		}
@@ -660,6 +664,26 @@ void intervention_lateral_flow_test_take( model *model, individual *indiv )
 	else if ( indiv->lateral_flow_test_capacity > 0 )
 		add_individual_to_event_list( model, LATERAL_FLOW_TEST_TAKE, indiv, model->time + 1 );
 
+}
+
+/*****************************************************************************************
+*  Name:		calculate_mean_lfa_sensitivity
+*  Description: Calculates the mean sensitivity for Lateral Flow tests on this date.
+*  Returns:		double
+******************************************************************************************/
+double calculate_mean_lfa_sensitivity( model *model, int time )
+{
+	double total = 0;
+	long cnt = 0;
+	for( int idx = 0; idx < model->params->n_total; idx++ )
+	{
+		if( model->population[ idx ].lateral_flow_test_sensitivity >= 0 )
+		{
+			total += model->population[ idx ].lateral_flow_test_sensitivity;
+			cnt++;
+		}
+	}
+	return cnt > 0 ? total / cnt : 0;
 }
 
 /*****************************************************************************************

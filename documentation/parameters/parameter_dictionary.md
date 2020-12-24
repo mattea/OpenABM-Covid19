@@ -172,9 +172,9 @@
 | `priority_test_contacts_70_79` | 1000 | - | Number of contacts that triggers priority test for individuals aged 70-79 years old | - |
 | `priority_test_contacts_80` | 1000 | - | Number of contacts that triggers priority test for individuals aged 80+ years old | - |
 | `lateral_flow_test_order_wait` | 1 | - | Number of days to wait to receive a set of lateral flow tests | - |
-| `lateral_flow_test_repeat_count` | 7 | - | Number of daily Lateral Flow Assay tests to take in a row | - |
 | `lateral_flow_test_on_symptoms` | 0 | - | Test individuals with Lateral Flow Assay who show symptoms (0=no, 1=yes) | - |
 | `lateral_flow_test_on_traced` | 0 | - | Test individuals with Lateral Flow Assay who have been contact-traced (0=no, 1=yes) | - |
+| `lateral_flow_test_repeat_count` | 7 | - | Number of daily Lateral Flow Assay tests to take in a row | - |
 | `lateral_flow_test_sensitivity` | 0.95 | - | Peak sensitivity of Lateral Flow Assay | - |
 | `lateral_flow_test_specificity` | 0.999 | - | Specificity of Lateral Flow Assay (at any time) | - |
 | `self_quarantine_fraction` | 0 | - | Proportion of people who self-quarantine upon symptoms | - |
