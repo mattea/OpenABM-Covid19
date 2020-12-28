@@ -579,7 +579,6 @@ void intervention_test_take( model *model, individual *indiv )
 ******************************************************************************************/
 void intervention_lateral_flow_test_order( model *model, individual *indiv, int time )
 {
-	printf("Ordering LFA\n");
 	if( indiv->lateral_flow_test_result != TEST_ORDERED && !(indiv->infection_events->is_case) )
 	{
 		indiv->lateral_flow_test_capacity = model->params->lateral_flow_test_repeat_count;
@@ -598,10 +597,8 @@ void intervention_lateral_flow_test_order( model *model, individual *indiv, int 
 ******************************************************************************************/
 void intervention_lateral_flow_test_take( model *model, individual *indiv )
 {
-	printf("Try to take LFA\n");
 	if (indiv->lateral_flow_test_capacity <= 0) return;
 	indiv->lateral_flow_test_capacity--;
-	printf("Taking LFA\n");
 
 	int result_time = model->time;
 
@@ -649,7 +646,6 @@ void intervention_lateral_flow_test_take( model *model, individual *indiv )
 			sensitivity = 1 / ( 1 + exp( -V ) ) * model->params->lateral_flow_test_sensitivity;
 			sensitivity = max( 0, min( 1, sensitivity ) );
 			indiv->lateral_flow_test_sensitivity = sensitivity;
-			printf("Lateral flow test it %d, pt %d, ict %0.4f, icp %0.4f, im %0.4f, I %0.4f, V %0.4f, s %0.4f\n", time_infected, peak_time, infectious_curve[time_infected], infectious_curve[peak_time], indiv->infectiousness_multiplier, I, V, sensitivity);
 			indiv->lateral_flow_test_result = gsl_ran_bernoulli( rng, sensitivity );
 		}
 	}
