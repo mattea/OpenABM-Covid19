@@ -579,11 +579,12 @@ void intervention_test_take( model *model, individual *indiv )
 ******************************************************************************************/
 void intervention_lateral_flow_test_order( model *model, individual *indiv, int time )
 {
+	printf("Ordering LFA\n");
 	if( indiv->lateral_flow_test_result != TEST_ORDERED && !(indiv->infection_events->is_case) )
 	{
 		indiv->lateral_flow_test_capacity = model->params->lateral_flow_test_repeat_count;
-        add_individual_to_event_list( model, LATERAL_FLOW_TEST_TAKE, indiv, time );
-        indiv->lateral_flow_test_result = TEST_ORDERED;
+		add_individual_to_event_list( model, LATERAL_FLOW_TEST_TAKE, indiv, time );
+		indiv->lateral_flow_test_result = TEST_ORDERED;
 	}
 }
 
@@ -597,8 +598,10 @@ void intervention_lateral_flow_test_order( model *model, individual *indiv, int 
 ******************************************************************************************/
 void intervention_lateral_flow_test_take( model *model, individual *indiv )
 {
+	printf("Try to take LFA\n");
 	if (indiv->lateral_flow_test_capacity <= 0) return;
 	indiv->lateral_flow_test_capacity--;
+	printf("Taking LFA\n");
 
 	int result_time = model->time;
 
@@ -646,7 +649,7 @@ void intervention_lateral_flow_test_take( model *model, individual *indiv )
 			sensitivity = 1 / ( 1 + exp( -V ) ) * model->params->lateral_flow_test_sensitivity;
 			sensitivity = max( 0, min( 1, sensitivity ) );
 			indiv->lateral_flow_test_sensitivity = sensitivity;
-			// printf("Lateral flow test it %d, pt %d, ict %0.4f, icp %0.4f, im %0.4f, I %0.4f, V %0.4f, s %0.4f\n", time_infected, peak_time, infectious_curve[time_infected], infectious_curve[peak_time], indiv->infectiousness_multiplier, I, V, sensitivity);
+			printf("Lateral flow test it %d, pt %d, ict %0.4f, icp %0.4f, im %0.4f, I %0.4f, V %0.4f, s %0.4f\n", time_infected, peak_time, infectious_curve[time_infected], infectious_curve[peak_time], indiv->infectiousness_multiplier, I, V, sensitivity);
 			indiv->lateral_flow_test_result = gsl_ran_bernoulli( rng, sensitivity );
 		}
 	}
@@ -1017,6 +1020,9 @@ void intervention_on_symptoms( model *model, individual *indiv )
 	int quarantine, time_event;
 	parameters *params = model->params;
 
+	if( params->lateral_flow_test_on_symptoms )
+		intervention_lateral_flow_test_order( model, indiv, model->time + params->lateral_flow_test_order_wait );
+
 	quarantine = indiv->quarantined || gsl_ran_bernoulli( rng, params->self_quarantine_fraction );
 
 	if( quarantine )
@@ -1034,9 +1040,6 @@ void intervention_on_symptoms( model *model, individual *indiv )
 
 		if( params->test_on_symptoms )
 			intervention_test_order( model, indiv, model->time + params->test_order_wait );
-
-		if( params->lateral_flow_test_on_symptoms )
-			intervention_lateral_flow_test_order( model, indiv, model->time + params->lateral_flow_test_order_wait );
 
 		if( params->trace_on_symptoms && ( params->quarantine_on_traced || params->test_on_traced ) )
 			intervention_notify_contacts( model, indiv, 1, index_token, DIGITAL_TRACE );
@@ -1178,6 +1181,9 @@ void intervention_on_traced(
 
 	parameters *params = model->params;
 
+	if( params->lateral_flow_test_on_traced )
+		intervention_lateral_flow_test_order( model, indiv, model->time + params->lateral_flow_test_order_wait );
+
 	if( params->quarantine_on_traced )
 	{
 		int time_event = model->time;
@@ -1202,9 +1208,6 @@ void intervention_on_traced(
 			int time_test = max( model->time + params->test_order_wait, contact_time + params->test_insensitive_period );
 			intervention_test_order( model, indiv, time_test );
 		}
-
-		if( params->lateral_flow_test_on_traced )
-			intervention_lateral_flow_test_order( model, indiv, model->time + params->lateral_flow_test_order_wait );
 
 		if( quarantine && recursion_level != NOT_RECURSIVE )
 		{
