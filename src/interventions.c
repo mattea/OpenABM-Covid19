@@ -1202,12 +1202,12 @@ void intervention_on_traced(
 	{
 		int time_event = model->time;
 		int quarantine;
+
 		if (params->lateral_flow_test_only && lateral_flow_test)
 		{
 			time_event = model->time;
 		}
-
-		if( index_token->index_status == SYMPTOMS_ONLY )
+		else if( index_token->index_status == SYMPTOMS_ONLY )
 		{
 			if( gsl_ran_bernoulli( rng, params->quarantine_compliance_traced_symptoms ) )
 				time_event = contact_time + sample_transition_time( model, TRACED_QUARANTINE_SYMPTOMS );

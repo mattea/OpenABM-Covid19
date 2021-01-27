@@ -814,33 +814,33 @@ class TestClass(object):
             # Test on Trace
             dict(
                 test_params = dict( 
-                    n_seed_infection = 300,
+                    n_seed_infection = 100,
                     end_time = 10,
                     infectious_rate = 6,
                     sd_infectiousness_multiplier = 0.4,
                     app_turn_on_time = 0,
                     test_on_symptoms = True,
+                    test_order_wait = 0,
+                    test_result_wait = 0,
                     trace_on_symptoms = False,
                     trace_on_positive = True,
                     lateral_flow_test_order_wait = 0,
                     lateral_flow_test_on_symptoms = False,
                     lateral_flow_test_on_traced = True,
-                    self_quarantine_fraction = 0.0,
+                    self_quarantine_fraction = 1.0,
                     quarantine_on_traced = True,
-                    quarantine_compliance_positive = 0,
+                    quarantine_compliance_positive = 1,
                     quarantine_compliance_traced_positive = 1,
-                    lateral_flow_test_sensitivity = 1,
-                    lateral_flow_test_specificity = 1,
-                    lateral_flow_test_repeat_count = 1,
                     lateral_flow_test_only = 1,
-                    lateral_flow_test_fraction = 0.4,
+                    lateral_flow_test_fraction = 0.5,
                 ),
-                expected_ratio_lfa = 0.4,
+                quarantine_expected = True,
+                quarantine_reason = 4, # QR_TRACE_POSITIVE
             ),
             # LFA only on trace
             dict(
                 test_params = dict( 
-                    n_seed_infection = 300,
+                    n_seed_infection = 100,
                     end_time = 10,
                     infectious_rate = 6,
                     sd_infectiousness_multiplier = 0.4,
@@ -853,20 +853,22 @@ class TestClass(object):
                     lateral_flow_test_on_traced = True,
                     quarantine_on_traced = True,
                     self_quarantine_fraction = 1,
-                    quarantine_compliance_positive = 0,
+                    quarantine_compliance_positive = 1,
                     quarantine_compliance_traced_positive = 0.5,
+                    quarantine_dropout_traced_positive = 0,
                     lateral_flow_test_sensitivity = 1,
                     lateral_flow_test_specificity = 1,
                     lateral_flow_test_repeat_count = 1,
                     lateral_flow_test_only = 1,
-                    lateral_flow_test_fraction = 0.8,
+                    lateral_flow_test_fraction = 1,
                 ),
-                expected_ratio_lfa = 8/(8+1),
+                quarantine_expected = False,
+                quarantine_reason = 4, # QR_TRACE_POSITIVE
             ),
             # Both on trace
             dict(
                 test_params = dict( 
-                    n_seed_infection = 200,
+                    n_seed_infection = 100,
                     end_time = 10,
                     infectious_rate = 6,
                     sd_infectiousness_multiplier = 0.4,
@@ -879,20 +881,22 @@ class TestClass(object):
                     lateral_flow_test_on_traced = True,
                     self_quarantine_fraction = 1,
                     quarantine_on_traced = True,
-                    quarantine_compliance_positive = 0,
+                    quarantine_compliance_positive = 1,
                     quarantine_compliance_traced_positive = 1,
+                    quarantine_dropout_traced_positive = 0,
                     lateral_flow_test_sensitivity = 1,
                     lateral_flow_test_specificity = 1,
                     lateral_flow_test_repeat_count = 1,
                     lateral_flow_test_fraction = 1.0,
                     lateral_flow_test_only = 0,
                 ),
-                expected_ratio_lfa = 0.5,
+                quarantine_expected = True,
+                quarantine_reason = 4, # QR_TRACE_POSITIVE
             ),
             # LFA and Quarantine on Symptoms only.
             dict(
                 test_params = dict( 
-                    n_seed_infection = 200,
+                    n_seed_infection = 100,
                     end_time = 10,
                     infectious_rate = 6,
                     sd_infectiousness_multiplier = 0.4,
@@ -900,15 +904,40 @@ class TestClass(object):
                     trace_on_symptoms = False,
                     lateral_flow_test_order_wait = 0,
                     lateral_flow_test_on_symptoms = True,
-                    quarantine_compliance_positive = 0,
+                    quarantine_compliance_positive = 1,
+                    quarantine_dropout_self = 0,
                     lateral_flow_test_sensitivity = 1,
                     lateral_flow_test_specificity = 1,
                     lateral_flow_test_repeat_count = 1,
                     lateral_flow_test_only = 0,
-                    self_quarantine_fraction = 0.8,
-                    lateral_flow_test_fraction = 0.8,
+                    self_quarantine_fraction = 0.6,
+                    lateral_flow_test_fraction = 0.6,
                 ),
-                expected_ratio_lfa = 0.5,
+                quarantine_expected = True,
+                quarantine_reason = 1, # QR_SELF_SYMPTOMS
+            ),
+            # LFA only on Symptoms.
+            dict(
+                test_params = dict( 
+                    n_seed_infection = 100,
+                    end_time = 10,
+                    infectious_rate = 6,
+                    sd_infectiousness_multiplier = 0.4,
+                    test_on_symptoms = False,
+                    trace_on_symptoms = False,
+                    lateral_flow_test_order_wait = 0,
+                    lateral_flow_test_on_symptoms = True,
+                    quarantine_compliance_positive = 1,
+                    quarantine_dropout_self = 0,
+                    lateral_flow_test_sensitivity = 1,
+                    lateral_flow_test_specificity = 1,
+                    lateral_flow_test_repeat_count = 1,
+                    lateral_flow_test_only = 1,
+                    lateral_flow_test_fraction = 1,
+                    self_quarantine_fraction = 1,
+                ),
+                quarantine_expected = False,
+                quarantine_reason = 1, # QR_SELF_SYMPTOMS
             ),
         ],
         "test_lateral_flow_test_sensitivity": [
@@ -2215,7 +2244,7 @@ class TestClass(object):
         df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
         np.testing.assert_equal(sum(df_indiv["lateral_flow_status"] >= 0), 0, "Unexpected Lateral Flow tests found.")
 
-    def test_lateral_flow_interventions_vs_quarantine(self, test_params, expected_ratio_lfa):
+    def test_lateral_flow_interventions_vs_quarantine(self, test_params, quarantine_expected, quarantine_reason):
         """
         Test that we have the expected ratio between number of quarantines performed and number of LFA tests performed.
         """
@@ -2230,7 +2259,7 @@ class TestClass(object):
         model = utils.get_model_swig( params )
         
         all_test = []
-        for time in range( end_time ):
+        for time in range( 1, end_time + 1 ):
             model.one_time_step()
 
             # write files
@@ -2239,9 +2268,9 @@ class TestClass(object):
 
             # read CSV's
             df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
-            df_indiv["time"] = time +1
+            df_indiv["time"] = time
 
-            df_quar = pd.read_csv( constant.TEST_QUARANTINE_REASONS_FILE.substitute(T = time + 1), comment="#", sep=",", skipinitialspace=True )
+            df_quar = pd.read_csv( constant.TEST_QUARANTINE_REASONS_FILE.substitute(T = time ), comment="#", sep=",", skipinitialspace=True )
             df_quar = df_quar[["ID","quarantine_reason"]]
 
             df_test = pd.merge( df_indiv, df_quar, on = "ID", how = "left")
@@ -2249,20 +2278,12 @@ class TestClass(object):
 
         del model
     
-        # find everyone with a test result
         df_test = pd.concat(all_test)
-        # Not hospitalized
-        #df_test = df_test[ ~df_test["current_status"].isin((6,7,8)) ]
 
-        # check the specificity of the test
         lfa_test  = sum( df_test["lateral_flow_status"] >= 0 )
-        quar = sum( (df_test[ "time_quarantined" ] == df_test[ "time" ]) & (df_test[ "quarantine_reason" ] == 4 ))
-        p_val     = binom.cdf( lfa_test, ( lfa_test + quar ), expected_ratio_lfa )
-        np.testing.assert_equal( lfa_test > 50, True, f"In-sufficient LFA tests to test: {lfa_test} <= 50" )
-        if expected_ratio_lfa < 1:
-          np.testing.assert_equal( quar > 50, True, f"In-sufficient quarantines to test: {quar} <= 50" )
-        np.testing.assert_equal( p_val > lower_CI, True, f"Too few LFA tests given the number of quarantines exp_ratio={expected_ratio_lfa}, lfa={lfa_test}, quar={quar}, p={p_val}" )
-        np.testing.assert_equal( p_val < upper_CI, True, f"Too many LFA tests given the number of quarantines exp_ratio={expected_ratio_lfa}, lfa={lfa_test}, quar={quar}, p={p_val}" )
+        quar = sum( (df_test[ "quarantine_reason" ] == quarantine_reason ) )
+        np.testing.assert_equal( lfa_test > 0, True, f"Expected existence of LFA tests." )
+        np.testing.assert_equal( quar > 0, quarantine_expected, f"Expected existnce of quarantines to be {quarantine_expected}" )
 
     def test_lateral_flow_test_sensitivity(self, test_params):
         """
