@@ -116,6 +116,7 @@ typedef struct{
 
 	double quarantine_compliance_traced_symptoms; // probability that someone complies with a amber quarantine message
 	double quarantine_compliance_traced_positive; // probability that someone complies with a red quarantine message
+	double quarantine_compliance_positive;        // probability that someone complies with a quarantine after testing positive
 
 	int quarantine_on_traced;				// immediately quarantine those who are contact traced
 	int quarantine_smart_release_day;		// number of days until smart release on no contacts
@@ -152,6 +153,8 @@ typedef struct{
 	double lateral_flow_test_sensitivity;	  // peak sensitivity of lateral flow test
 	double lateral_flow_test_specificity;	  // specificity of lateral flow test
 	int lateral_flow_test_repeat_count;		  // number of tests to take, one per day, when advised to do so
+	int lateral_flow_test_only;		  // if lateral flow testing, do not perform other interventions until you have a positive test result
+	double lateral_flow_test_fraction;		  // if offered lateral flow testing, the fraction of people that will choose it
 
 	double app_users_fraction[N_AGE_GROUPS];// Proportion of the population that use the app by age
 	int app_turned_on;						// is the app turned on
@@ -211,6 +214,7 @@ int get_model_param_hospital_on(model *pmodel);
 double get_model_param_daily_fraction_work_used(model *pmodel, int idx);
 int get_model_param_quarantine_days(model *pmodel);
 double get_model_param_self_quarantine_fraction(model *pmodel);
+double get_model_param_quarantine_compliance_positive(model *pmodel);
 int get_model_param_trace_on_symptoms(model *pmodel);
 int get_model_param_trace_on_positive(model *pmodel);
 int get_model_param_quarantine_on_traced(model *pmodel);
@@ -254,9 +258,12 @@ int get_model_param_lateral_flow_test_on_symptoms(model *pmodel);
 int get_model_param_lateral_flow_test_on_traced(model *pmodel);
 int get_model_param_lateral_flow_test_order_wait(model *pmodel);
 int get_model_param_lateral_flow_test_repeat_count(model *pmodel);
+int get_model_param_lateral_flow_test_only(model *pmodel);
+double get_model_param_lateral_flow_test_fraction(model *pmodel);
 
 int set_model_param_quarantine_days(model *pmodel, int value);
 int set_model_param_self_quarantine_fraction(model *pmodel, double value);
+int set_model_param_quarantine_compliance_positive(model *pmodel, double value);
 int set_model_param_trace_on_symptoms(model *pmodel, int value);
 int set_model_param_trace_on_positive(model *pmodel, int value);
 int set_model_param_quarantine_on_traced(model *pmodel, int value);
@@ -298,6 +305,8 @@ int set_model_param_lateral_flow_test_on_symptoms( model *pmodel, int value );
 int set_model_param_lateral_flow_test_on_traced( model *pmodel, int value );
 int set_model_param_lateral_flow_test_order_wait( model *pmodel, int value );
 int set_model_param_lateral_flow_test_repeat_count( model *pmodel, int value );
+int set_model_param_lateral_flow_test_only(model *pmodel, int value );
+int set_model_param_lateral_flow_test_fraction(model *pmodel, double value );
 
 int set_model_param_risk_score( model*, int, int, int, double );
 int set_model_param_risk_score_household( model*, int, int, double );

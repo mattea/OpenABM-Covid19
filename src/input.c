@@ -326,6 +326,9 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %lf ,", &(params->quarantine_compliance_traced_positive));
 	if( check < 1){ print_exit("Failed to read parameter quarantine_compliance_traced_positive\n"); };
 
+	check = fscanf(parameter_file, " %lf ,", &(params->quarantine_compliance_positive));
+	if( check < 1){ print_exit("Failed to read parameter quarantine_compliance_positive\n"); };
+
 	check = fscanf(parameter_file, " %i ,", &(params->test_on_symptoms));
 	if( check < 1){ print_exit("Failed to read parameter test_on_symptoms\n"); };
 
@@ -427,6 +430,12 @@ void read_param_file( parameters *params)
     
 	check = fscanf(parameter_file, "%i,",   &(params->lateral_flow_test_repeat_count));
 	if( check < 1){ print_exit("Failed to read parameter lateral_flow_test_repeat_count\n"); };
+
+	check = fscanf(parameter_file, "%i,",   &(params->lateral_flow_test_only));
+	if( check < 1){ print_exit("Failed to read parameter lateral_flow_test_only\n"); };
+
+	check = fscanf(parameter_file, "%lf,",   &(params->lateral_flow_test_fraction));
+	if( check < 1){ print_exit("Failed to read parameter lateral_flow_test_fraction\n"); };
 
 	check = fscanf(parameter_file, "%lf,",   &(params->lateral_flow_test_sensitivity));
 	if( check < 1){ print_exit("Failed to read parameter lateral_flow_test_sensitivity\n"); };
