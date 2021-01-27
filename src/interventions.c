@@ -7,6 +7,7 @@
 
 #include "model.h"
 #include "individual.h"
+#include "gsl/gsl_randist.h"
 #include "utilities.h"
 #include "constant.h"
 #include "params.h"
@@ -352,6 +353,15 @@ void update_intervention_policy( model *model, int time )
 	{
 		model->manual_trace_interview_quota = params->manual_trace_n_workers * params->manual_trace_interviews_per_worker_day;
 		model->manual_trace_notification_quota = params->manual_trace_n_workers * params->manual_trace_notifications_per_worker_day;
+	}
+
+	for( int idx = 0; idx < model->params->n_total; idx++ )
+	{
+		if( model->population[ idx ].lateral_flow_test_result >= 0 )
+		{
+			model->population[ idx ].lateral_flow_test_result = NO_TEST;
+			model->population[ idx ].lateral_flow_test_sensitivity = NO_TEST;
+		}
 	}
 }
 
