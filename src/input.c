@@ -449,6 +449,9 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, "%lf,",   &(params->lateral_flow_test_specificity));
 	if( check < 1){ print_exit("Failed to read parameter lateral_flow_test_specificity\n"); };
 
+	check = fscanf(parameter_file, "%lf,",   &(params->mass_testing_fraction));
+	if( check < 1){ print_exit("Failed to read parameter mass_testing_fraction\n"); };
+
 	check = fscanf(parameter_file, " %lf ,", &(params->self_quarantine_fraction));
 	if( check < 1){ print_exit("Failed to read parameter self_quarantine_fraction\n"); };
 

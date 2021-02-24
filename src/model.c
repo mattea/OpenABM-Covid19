@@ -1358,6 +1358,9 @@ int one_time_step( model *model )
 		transition_events( model, LATERAL_FLOW_TEST_CLEAR,              &intervention_lateral_flow_test_clear,          TRUE );
 	}
 
+	if ( model->params->mass_testing_fraction > 0 )
+		intervention_mass_testing( model );
+
 	while( ( n_daily( model, TEST_TAKE, model->time ) > 0 ) ||
 		   ( n_daily( model, TEST_RESULT, model->time ) > 0 ) ||
 		   ( n_daily( model, LATERAL_FLOW_TEST_TAKE, model->time ) > 0 ) ||

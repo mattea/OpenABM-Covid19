@@ -158,6 +158,8 @@ typedef struct{
 	int lateral_flow_test_only;		  // if lateral flow testing, do not perform other interventions until you have a positive test result
 	double lateral_flow_test_fraction;		  // if offered lateral flow testing, the fraction of people that will choose it
 
+	double mass_testing_faction;  // the proportion of the population that receives mass testing each day.
+
 	double app_users_fraction[N_AGE_GROUPS];// Proportion of the population that use the app by age
 	int app_turned_on;						// is the app turned on
 	int app_turn_on_time;   				// time after which the app is usable
@@ -262,6 +264,7 @@ int get_model_param_lateral_flow_test_order_wait(model *pmodel);
 int get_model_param_lateral_flow_test_repeat_count(model *pmodel);
 int get_model_param_lateral_flow_test_only(model *pmodel);
 double get_model_param_lateral_flow_test_fraction(model *pmodel);
+double get_model_param_mass_testing_fraction(model *pmodel);
 
 int set_model_param_quarantine_days(model *pmodel, int value);
 int set_model_param_self_quarantine_fraction(model *pmodel, double value);
@@ -309,6 +312,7 @@ int set_model_param_lateral_flow_test_order_wait( model *pmodel, int value );
 int set_model_param_lateral_flow_test_repeat_count( model *pmodel, int value );
 int set_model_param_lateral_flow_test_only(model *pmodel, int value );
 int set_model_param_lateral_flow_test_fraction(model *pmodel, double value );
+int set_model_param_mass_testing_fraction(model *pmodel, double value );
 
 int set_model_param_risk_score( model*, int, int, int, double );
 int set_model_param_risk_score_household( model*, int, int, double );

@@ -912,6 +912,33 @@ double calculate_mean_lfa_sensitivity( model *model, int type )
 }
 
 /*****************************************************************************************
+*  Name:		intervention_mass_testing
+*  Description: Performs mass testing on a fraction of the population. Assumes
+*  the fraction is much smaller than the total.
+*  Returns:		double
+******************************************************************************************/
+void intervention_mass_testing( model *model )
+{
+	parameters *params = model->params;
+	individual * indiv;
+	long idx;
+	long miss_cnt = 2 * params->n_total;
+
+	for( int test_idx = params->mass_testing_fraction * params->n_total; test_idx > 0 && miss_cnt > 0; )
+	{
+		indiv = &( model->population[ gsl_rng_uniform_int( rng, params->n_total ) ] );
+		if( !is_in_hospital( indiv ) && indiv->quarantine_test_result == NO_TEST && indiv->lateral_flow_test_result == NO_TEST )
+		{
+			intervention_lateral_flow_test_order( model, indiv, model->time + params->lateral_flow_test_order_wait );
+			test_idx--;
+		} else 
+		{
+			miss_cnt--;
+		}
+	}
+}
+
+/*****************************************************************************************
 *  Name:		intervention_test_result
 *  Description: An individual gets a test result
 *

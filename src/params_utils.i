@@ -808,6 +808,15 @@ double get_param_lateral_flow_test_fraction(parameters *params)
 }
 
 /*****************************************************************************************
+*  Name:		get_param_mass_testing_fraction
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+double get_param_mass_testing_fraction(parameters *params)
+{
+    return params->mass_testing_fraction;
+}
+
+/*****************************************************************************************
 *  Name:		get_param_app_users_fraction
 *  Description: Gets the value of double parameter
 ******************************************************************************************/
@@ -1789,6 +1798,16 @@ int set_param_lateral_flow_test_only(parameters *params, int value)
 int set_param_lateral_flow_test_fraction(parameters *params, double value)
 {
     params->lateral_flow_test_fraction = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_param_mass_testing_fraction
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_param_mass_testing_fraction(parameters *params, double value)
+{
+    params->mass_testing_fraction = value;
     return TRUE;
 }
 

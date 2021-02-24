@@ -633,6 +633,15 @@ double get_model_param_lateral_flow_test_fraction(model *model)
 }
 
 /*****************************************************************************************
+*  Name:		get_model_param_mass_testing_fraction
+*  Description: Gets the value of an double parameter
+******************************************************************************************/
+double get_model_param_mass_testing_fraction(model *model)
+{
+    return model->params->mass_testing_fraction;
+}
+
+/*****************************************************************************************
 *  Name:		get_model_param_app_users_fraction
 *  Description: Gets the value of double parameter
 ******************************************************************************************/
@@ -1084,6 +1093,16 @@ int set_model_param_lateral_flow_test_only(model *model, int value)
 int set_model_param_lateral_flow_test_fraction(model *model, double value)
 {
     model->params->lateral_flow_test_fraction = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_model_param_mass_testing_fraction
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_mass_testing_fraction(model *model, double value)
+{
+    model->params->mass_testing_fraction = value;
     return TRUE;
 }
 

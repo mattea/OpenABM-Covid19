@@ -74,6 +74,7 @@ PYTHON_SAFE_UPDATE_PARAMS = [
     "manual_traceable_fraction_household",
     "manual_traceable_fraction_occupation",
     "manual_traceable_fraction_random",
+    "mass_testing_fraction",
     "relative_transmission_household",
     "relative_transmission_occupation",
     "relative_transmission_random",

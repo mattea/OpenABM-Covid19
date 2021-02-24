@@ -43,6 +43,7 @@
 | `lateral_flow_test_fraction` | 0.5 | - | The fraction of individuals who take a Lateral Flow Assay test instead of quarantine if offered | - |
 | `lateral_flow_test_sensitivity` | 0.95 | - | Peak sensitivity of Lateral Flow Assay | - |
 | `lateral_flow_test_specificity` | 0.999 | - | Specificity of Lateral Flow Assay (at any time) | - |
+| `mass_testing_fraction` | 0.0 | - | The fraction of the population who are sent a Lateral Flow Assay test kit each day. | - |
 | `app_users_fraction_0_9` | 0.09 | - | Maximum fraction of the population with smartphones aged 0-9 | OFCOM 3-5 year olds |
 | `app_users_fraction_10_19` | 0.8 | - | Maximum fraction of the population with smartphones aged 10-19 | OFCOM 5-15 year olds |
 | `app_users_fraction_20_29` | 0.97 | - | Maximum fraction of the population with smartphones aged 20-29 | OFCOM 16-55 year olds |
