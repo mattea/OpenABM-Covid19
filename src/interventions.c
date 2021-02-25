@@ -927,7 +927,9 @@ void intervention_mass_testing( model *model )
 	for( int test_idx = params->mass_testing_fraction * params->n_total; test_idx > 0 && miss_cnt > 0; )
 	{
 		indiv = &( model->population[ gsl_rng_uniform_int( rng, params->n_total ) ] );
-		if( !is_in_hospital( indiv ) && indiv->quarantine_test_result == NO_TEST && indiv->lateral_flow_test_result == NO_TEST )
+		if( !is_in_hospital( indiv ) &&
+			( indiv->quarantine_test_result == NO_TEST || indiv->quarantine_test_result == FALSE ) &&
+			indiv->lateral_flow_test_result == NO_TEST )
 		{
 			intervention_lateral_flow_test_order( model, indiv, model->time + params->lateral_flow_test_order_wait );
 			test_idx--;
