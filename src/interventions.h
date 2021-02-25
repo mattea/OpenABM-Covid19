@@ -67,6 +67,7 @@ void intervention_lateral_flow_test_order( model*, individual*, int );
 void intervention_lateral_flow_test_take( model*, individual* );
 void intervention_lateral_flow_test_clear( model*, individual* );
 double calculate_mean_lfa_sensitivity( model *, int );
+void intervention_mass_testing( model * );
 
 void intervention_smart_release( model* );
 int resolve_quarantine_reasons(int *);

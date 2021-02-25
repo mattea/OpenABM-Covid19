@@ -921,7 +921,6 @@ void intervention_mass_testing( model *model )
 {
 	parameters *params = model->params;
 	individual * indiv;
-	long idx;
 	long miss_cnt = 2 * params->n_total;
 
 	for( int test_idx = params->mass_testing_fraction * params->n_total; test_idx > 0 && miss_cnt > 0; )
