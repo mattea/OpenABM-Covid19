@@ -930,7 +930,8 @@ void intervention_mass_testing( model *model )
 			( indiv->quarantine_test_result == NO_TEST || indiv->quarantine_test_result == FALSE ) &&
 			indiv->lateral_flow_test_result == NO_TEST )
 		{
-			intervention_lateral_flow_test_order( model, indiv, model->time + params->lateral_flow_test_order_wait );
+			indiv->lateral_flow_test_capacity++;
+			intervention_lateral_flow_test_take( model, indiv );
 			test_idx--;
 		} else 
 		{
